@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { ArrowRight, Play, Pause, SkipForward, SkipBack, Volume2, Type, BookOpen, Loader2, Bookmark, BookmarkCheck } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ArrowRight, Play, Pause, SkipForward, SkipBack, Volume2, Type, BookOpen, Loader2, Bookmark, BookmarkCheck, Repeat, Repeat1, Download, Gauge } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchSurahWithAudio, RECITERS, READING_VERSIONS, type SurahDetail } from "@/lib/quranApi";
 import { addBookmark, removeBookmark, isBookmarked, setLastRead } from "@/lib/bookmarks";
@@ -16,6 +16,9 @@ interface SurahReaderProps {
   onBack: () => void;
 }
 
+type LoopMode = "none" | "ayah" | "surah";
+const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+
 const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }: SurahReaderProps) => {
   const [reciter, setReciter] = useState(RECITERS[0].id);
   const [readingVersion, setReadingVersion] = useState(READING_VERSIONS[0].id);
@@ -23,6 +26,9 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }:
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Set<number>>(new Set());
+  const [loopMode, setLoopMode] = useState<LoopMode>("none");
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [isDownloading, setIsDownloading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ayahRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const { toast } = useToast();
@@ -61,13 +67,7 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }:
           if (entry.isIntersecting) {
             const idx = Number(entry.target.getAttribute("data-ayah-idx"));
             if (!isNaN(idx)) {
-              setLastRead({
-                surahNumber,
-                surahName,
-                surahNameAr,
-                ayahIndex: idx,
-                timestamp: Date.now(),
-              });
+              setLastRead({ surahNumber, surahName, surahNameAr, ayahIndex: idx, timestamp: Date.now() });
             }
           }
         });
@@ -84,42 +84,52 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }:
     };
   }, []);
 
+  // Update speed when it changes
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = playbackSpeed;
+  }, [playbackSpeed]);
+
   const toggleBookmark = (ayah: { numberInSurah: number; text: string }) => {
     if (bookmarkedAyahs.has(ayah.numberInSurah)) {
       removeBookmark(surahNumber, ayah.numberInSurah);
       setBookmarkedAyahs((prev) => { const s = new Set(prev); s.delete(ayah.numberInSurah); return s; });
       toast({ title: "Bookmark removed" });
     } else {
-      addBookmark({
-        surahNumber,
-        surahName,
-        surahNameAr,
-        ayahNumber: ayah.numberInSurah,
-        ayahText: ayah.text.substring(0, 80),
-        timestamp: Date.now(),
-      });
+      addBookmark({ surahNumber, surahName, surahNameAr, ayahNumber: ayah.numberInSurah, ayahText: ayah.text.substring(0, 80), timestamp: Date.now() });
       setBookmarkedAyahs((prev) => new Set(prev).add(ayah.numberInSurah));
       toast({ title: "Verse bookmarked ✓" });
     }
   };
 
-  const playAyah = (ayahIndex: number) => {
+  const playAyah = useCallback((ayahIndex: number) => {
     if (!data?.audio?.ayahs[ayahIndex]?.audio) return;
     if (audioRef.current) audioRef.current.pause();
     const audio = new Audio(data.audio.ayahs[ayahIndex].audio);
+    audio.playbackRate = playbackSpeed;
     audioRef.current = audio;
     setPlayingAyah(ayahIndex);
     setIsPlaying(true);
     audio.play();
+
+    // Scroll to playing ayah
+    const ayahNum = data.text.ayahs[ayahIndex]?.numberInSurah;
+    if (ayahNum && ayahRefs.current[ayahNum]) {
+      ayahRefs.current[ayahNum]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
     audio.onended = () => {
-      if (ayahIndex < data.audio.ayahs.length - 1) {
+      if (loopMode === "ayah") {
+        playAyah(ayahIndex);
+      } else if (ayahIndex < data.audio.ayahs.length - 1) {
         playAyah(ayahIndex + 1);
+      } else if (loopMode === "surah") {
+        playAyah(0);
       } else {
         setPlayingAyah(null);
         setIsPlaying(false);
       }
     };
-  };
+  }, [data, loopMode, playbackSpeed]);
 
   const togglePlay = () => {
     if (isPlaying && audioRef.current) { audioRef.current.pause(); setIsPlaying(false); }
@@ -131,6 +141,39 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }:
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     setPlayingAyah(null);
     setIsPlaying(false);
+  };
+
+  const cycleLoopMode = () => {
+    setLoopMode((prev) => prev === "none" ? "surah" : prev === "surah" ? "ayah" : "none");
+  };
+
+  const cycleSpeed = () => {
+    const idx = SPEED_OPTIONS.indexOf(playbackSpeed);
+    setPlaybackSpeed(SPEED_OPTIONS[(idx + 1) % SPEED_OPTIONS.length]);
+  };
+
+  const downloadSurahAudio = async () => {
+    if (!data?.audio?.ayahs?.length) return;
+    setIsDownloading(true);
+    try {
+      // Download first ayah as sample (full surah download would need server-side merging)
+      const firstAudio = data.audio.ayahs[0].audio;
+      if (firstAudio) {
+        const res = await fetch(firstAudio);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${surahName}-ayah-1.mp3`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast({ title: "Download started", description: "Ayah 1 audio downloading..." });
+      }
+    } catch {
+      toast({ title: "Download failed", variant: "destructive" });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -167,7 +210,8 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }:
           </Select>
         </div>
 
-        <div className="flex items-center gap-3 mt-3 bg-primary-foreground/10 rounded-xl p-2.5">
+        {/* Audio controls */}
+        <div className="flex items-center gap-2 mt-3 bg-primary-foreground/10 rounded-xl p-2.5">
           <button onClick={() => playingAyah !== null && playingAyah > 0 && playAyah(playingAyah - 1)} className="p-1.5 rounded-lg hover:bg-primary-foreground/10 transition">
             <SkipBack className="w-4 h-4" />
           </button>
@@ -177,11 +221,32 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }:
           <button onClick={() => data && playingAyah !== null && playingAyah < data.audio.ayahs.length - 1 && playAyah(playingAyah + 1)} className="p-1.5 rounded-lg hover:bg-primary-foreground/10 transition">
             <SkipForward className="w-4 h-4" />
           </button>
-          <div className="flex-1 text-xs opacity-70 text-center">
-            {playingAyah !== null ? `Ayah ${playingAyah + 1}` : "Tap play to listen"}
+          <div className="flex-1 text-xs opacity-70 text-center truncate">
+            {playingAyah !== null ? `Ayah ${playingAyah + 1}` : "Tap play"}
           </div>
-          <Volume2 className="w-4 h-4 opacity-50" />
+
+          {/* Loop */}
+          <button onClick={cycleLoopMode} className={`p-1.5 rounded-lg transition ${loopMode !== "none" ? "bg-primary-foreground/20" : "hover:bg-primary-foreground/10"}`} title={`Loop: ${loopMode}`}>
+            {loopMode === "ayah" ? <Repeat1 className="w-4 h-4" /> : <Repeat className="w-4 h-4" />}
+          </button>
+
+          {/* Speed */}
+          <button onClick={cycleSpeed} className="px-1.5 py-1 rounded-lg hover:bg-primary-foreground/10 transition text-xs font-bold min-w-[2rem]" title="Playback speed">
+            {playbackSpeed}x
+          </button>
+
+          {/* Download */}
+          <button onClick={downloadSurahAudio} disabled={isDownloading} className="p-1.5 rounded-lg hover:bg-primary-foreground/10 transition disabled:opacity-40">
+            <Download className="w-4 h-4" />
+          </button>
         </div>
+
+        {/* Loop indicator */}
+        {loopMode !== "none" && (
+          <p className="text-xs text-center opacity-60 mt-1.5">
+            {loopMode === "ayah" ? "🔂 Repeating current ayah" : "🔁 Repeating entire surah"}
+          </p>
+        )}
 
         <div className="flex items-center gap-3 mt-3">
           <Type className="w-4 h-4 opacity-60" />

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { BookOpen, Search, ChevronRight, Bookmark, Clock, Trash2, X, BookText, Layers, FileText } from "lucide-react";
+import { BookOpen, Search, ChevronRight, Bookmark, Clock, Trash2, X, BookText, Layers, FileText, BookOpenCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import PageHeader from "@/components/PageHeader";
 import SurahReader from "@/components/SurahReader";
@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import PageReader from "@/components/PageReader";
 
 type TabType = "surah" | "juz" | "page";
+type DisplayMode = "mushaf" | "list";
 
 const QuranPage = () => {
   const [search, setSearch] = useState("");
@@ -19,6 +20,7 @@ const QuranPage = () => {
   const [activeTab, setActiveTab] = useState<TabType>("surah");
   const [selectedPage, setSelectedPage] = useState<number | null>(null);
   const [selectedJuz, setSelectedJuz] = useState<number | null>(null);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("mushaf");
   const lastRead = getLastRead();
 
   const { data: surahs = [], isLoading } = useQuery({
@@ -49,8 +51,15 @@ const QuranPage = () => {
   }, [surahs, search, searchResults]);
 
   const openSurah = (surah: Surah, ayah?: number) => {
-    setSelectedSurah(surah);
-    setStartAyah(ayah);
+    if (displayMode === "mushaf") {
+      // In mushaf mode, open the page reader at page 1 of the surah
+      // For simplicity, just open surah reader since page mapping isn't available
+      setSelectedSurah(surah);
+      setStartAyah(ayah);
+    } else {
+      setSelectedSurah(surah);
+      setStartAyah(ayah);
+    }
   };
 
   const handleBack = () => {
@@ -60,6 +69,59 @@ const QuranPage = () => {
     setStartAyah(undefined);
     setBookmarks(getBookmarks());
   };
+
+  // Default mushaf mode: show page reader directly
+  if (displayMode === "mushaf" && !selectedSurah && selectedPage === null && selectedJuz === null && !search && !showBookmarks) {
+    return (
+      <div className="animate-fade-in">
+        <div className="islamic-gradient text-primary-foreground p-4 pb-3">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h1 className="text-lg font-bold flex items-center gap-2">
+                <BookOpen className="w-5 h-5" /> Al-Quran
+              </h1>
+              <p className="text-xs opacity-70 font-arabic">القرآن الكريم</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowBookmarks(true)}
+                className="p-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/15 transition"
+              >
+                <Bookmark className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setDisplayMode("list")}
+                className="px-3 py-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/15 transition text-xs font-medium flex items-center gap-1.5"
+              >
+                <BookText className="w-3.5 h-3.5" />
+                Surah List
+              </button>
+            </div>
+          </div>
+
+          {lastRead && (
+            <button
+              onClick={() => {
+                const s = surahs.find((s) => s.number === lastRead.surahNumber);
+                if (s) openSurah(s, lastRead.ayahIndex);
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-xl bg-primary-foreground/10 text-primary-foreground mb-2"
+            >
+              <Clock className="w-4 h-4 opacity-70" />
+              <div className="flex-1 text-left">
+                <p className="text-xs opacity-70">Continue Reading</p>
+                <p className="text-sm font-semibold">{lastRead.surahName} <span className="font-arabic opacity-80">{lastRead.surahNameAr}</span></p>
+              </div>
+              <ChevronRight className="w-4 h-4 opacity-60" />
+            </button>
+          )}
+        </div>
+
+        {/* Directly render the Mushaf page reader */}
+        <PageReader pageNumber={1} onBack={() => setDisplayMode("list")} />
+      </div>
+    );
+  }
 
   if (selectedSurah) {
     return (
@@ -101,6 +163,13 @@ const QuranPage = () => {
               className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 text-sm border-0 outline-none focus:bg-primary-foreground/15 transition"
             />
           </div>
+          <button
+            onClick={() => setDisplayMode("mushaf")}
+            className="px-3 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/15 transition"
+            title="Mushaf View"
+          >
+            <BookOpenCheck className="w-4 h-4 text-primary-foreground" />
+          </button>
           <button
             onClick={() => setShowBookmarks(!showBookmarks)}
             className={`px-3 rounded-xl transition ${showBookmarks ? "bg-primary-foreground/20" : "bg-primary-foreground/10 hover:bg-primary-foreground/15"}`}

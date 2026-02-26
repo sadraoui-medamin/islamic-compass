@@ -9,6 +9,24 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import AyahActionsPopover from "@/components/AyahActionsPopover";
 
+function useSwipe(onSwipeLeft: () => void, onSwipeRight: () => void, threshold = 50) {
+  const startRef = useRef<{ x: number; y: number } | null>(null);
+  return {
+    onTouchStart: (e: React.TouchEvent) => {
+      startRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    },
+    onTouchEnd: (e: React.TouchEvent) => {
+      if (!startRef.current) return;
+      const dx = e.changedTouches[0].clientX - startRef.current.x;
+      const dy = e.changedTouches[0].clientY - startRef.current.y;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
+        dx > 0 ? onSwipeRight() : onSwipeLeft();
+      }
+      startRef.current = null;
+    },
+  };
+}
+
 interface PageReaderProps {
   pageNumber?: number;
   juzNumber?: number;
@@ -23,10 +41,26 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
   const [reciter, setReciter] = useState(RECITERS[0].id);
   const [playingKey, setPlayingKey] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [swipeAnim, setSwipeAnim] = useState<"left" | "right" | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
   const isPageMode = pageNumber !== undefined;
+
+  const goNext = useCallback(() => {
+    if (!isPageMode || currentPage >= 604) return;
+    setSwipeAnim("left");
+    setTimeout(() => { setCurrentPage(p => Math.min(604, p + 1)); setSwipeAnim(null); }, 200);
+  }, [isPageMode, currentPage]);
+
+  const goPrev = useCallback(() => {
+    if (!isPageMode || currentPage <= 1) return;
+    setSwipeAnim("right");
+    setTimeout(() => { setCurrentPage(p => Math.max(1, p - 1)); setSwipeAnim(null); }, 200);
+  }, [isPageMode, currentPage]);
+
+  // RTL reading: swipe left = previous, swipe right = next
+  const swipeHandlers = useSwipe(goPrev, goNext);
 
   const { data, isLoading, error } = useQuery({
     queryKey: isPageMode ? ["page", currentPage, readingVersion] : ["juz", juzNumber, readingVersion],
@@ -168,19 +202,28 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
         {/* Page navigation */}
         {isPageMode && (
           <div className="flex items-center justify-between mt-3 bg-primary-foreground/10 rounded-xl p-2">
-            <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage <= 1} className="p-2 rounded-lg hover:bg-primary-foreground/10 transition disabled:opacity-30">
+            <button onClick={goPrev} disabled={currentPage <= 1} className="p-2 rounded-lg hover:bg-primary-foreground/10 transition disabled:opacity-30">
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="text-sm font-medium">Page {currentPage} / 604</span>
-            <button onClick={() => setCurrentPage((p) => Math.min(604, p + 1))} disabled={currentPage >= 604} className="p-2 rounded-lg hover:bg-primary-foreground/10 transition disabled:opacity-30">
+            <button onClick={goNext} disabled={currentPage >= 604} className="p-2 rounded-lg hover:bg-primary-foreground/10 transition disabled:opacity-30">
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         )}
+        {isPageMode && (
+          <p className="text-[10px] text-center opacity-50 mt-1">← Swipe to turn pages →</p>
+        )}
       </div>
 
       {/* Mushaf Content */}
-      <div className="px-3 py-4">
+      <div
+        className={`px-3 py-4 transition-all duration-200 ${
+          swipeAnim === "left" ? "translate-x-[-30px] opacity-0" :
+          swipeAnim === "right" ? "translate-x-[30px] opacity-0" : "translate-x-0 opacity-100"
+        }`}
+        {...(isPageMode ? swipeHandlers : {})}
+      >
         {isLoading && Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="space-y-2 p-6 mb-4 mushaf-page rounded-xl">
             <Skeleton className="h-8 w-full" />

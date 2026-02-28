@@ -36,7 +36,9 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
   const [mushafTheme, setMushafTheme] = useState<MushafTheme>("brown");
   const [immersive, setImmersive] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [pageJumpValue, setPageJumpValue] = useState("");
   const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pageInputRef = useRef<HTMLInputElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const { toast } = useToast();
@@ -300,7 +302,34 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
               <button onClick={(e) => { e.stopPropagation(); goPrev(); }} disabled={currentPage <= 1} className="p-1.5 rounded-lg bg-white/15 text-white disabled:opacity-30">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="text-white text-xs px-2">{currentPage}/604</span>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const num = parseInt(pageJumpValue);
+                  if (num >= 1 && num <= 604) {
+                    setCurrentPage(num);
+                    setPageJumpValue("");
+                    pageInputRef.current?.blur();
+                  }
+                }}
+                className="flex items-center"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <input
+                  ref={pageInputRef}
+                  type="number"
+                  min={1}
+                  max={604}
+                  value={pageJumpValue}
+                  onChange={(e) => setPageJumpValue(e.target.value)}
+                  placeholder={`${currentPage}`}
+                  className="w-12 h-7 text-center text-xs text-white bg-white/15 rounded-lg border-0 outline-none placeholder:text-white/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  onFocus={() => { if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current); }}
+                  onBlur={() => { overlayTimerRef.current = setTimeout(() => setShowOverlay(false), 2000); }}
+                />
+                <span className="text-white/50 text-xs mx-0.5">/604</span>
+              </form>
               <button onClick={(e) => { e.stopPropagation(); goNext(); }} disabled={currentPage >= 604} className="p-1.5 rounded-lg bg-white/15 text-white disabled:opacity-30">
                 <ChevronRight className="w-4 h-4" />
               </button>

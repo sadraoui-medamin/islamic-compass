@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Sun, Moon, Star, ChevronLeft, RotateCcw } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { adhkarCategories, type AdhkarCategory, type Dhikr } from "@/lib/adhkarData";
+import { useLanguage } from "@/lib/languageContext";
 
 const iconMap: Record<string, React.ElementType> = { sun: Sun, moon: Moon, star: Star };
 
 const AdhkarPage = () => {
+  const { t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<AdhkarCategory | null>(null);
   const [counters, setCounters] = useState<Record<number, number>>({});
 
@@ -44,7 +46,7 @@ const AdhkarPage = () => {
             </button>
           </div>
           <div className="text-xs opacity-70">
-            {totalDone}/{selectedCategory.adhkar.length} completed
+            {totalDone}/{selectedCategory.adhkar.length} {t("adhkar.completed")}
           </div>
           <div className="w-full h-1.5 rounded-full bg-primary-foreground/20 mt-2">
             <div
@@ -106,7 +108,7 @@ const AdhkarPage = () => {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Adhkar" subtitle="الأذكار" icon={<Sun className="w-6 h-6" />} />
+      <PageHeader title={t("adhkar.title")} subtitle={t("adhkar.subtitle")} icon={<Sun className="w-6 h-6" />} />
 
       <div className="px-4 py-4 grid grid-cols-2 gap-3">
         {adhkarCategories.map((cat, i) => {
@@ -124,7 +126,7 @@ const AdhkarPage = () => {
               <div className="text-center">
                 <p className="font-arabic text-base text-primary">{cat.arabic}</p>
                 <p className="text-xs font-medium text-foreground mt-0.5">{cat.title}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{cat.adhkar.length} adhkar</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{cat.adhkar.length} {t("adhkar.count")}</p>
               </div>
             </button>
           );

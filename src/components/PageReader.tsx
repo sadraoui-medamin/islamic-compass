@@ -386,7 +386,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
             {/* Mushaf-style continuous text */}
             <div className={`rounded-xl p-5 border ${theme.page}`} dir="rtl">
               <p
-                className="font-arabic text-right"
+                className="font-arabic text-justify"
                 style={{ fontSize: `${fontSize}px`, lineHeight: "2.6", color: theme.accent }}
               >
                 {group.ayahs.map((ayah) => {

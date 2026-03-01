@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { Clock, MapPin, Bell, Settings2, ChevronDown } from "lucide-react";
+import { Clock, MapPin, Bell, Settings2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import PageHeader from "@/components/PageHeader";
 import { fetchPrayerTimes, CALCULATION_METHODS } from "@/lib/prayerApi";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLanguage } from "@/lib/languageContext";
 
 const PrayerTimesPage = () => {
+  const { t } = useLanguage();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [location, setLocation] = useState("Detecting location...");
+  const [location, setLocation] = useState(t("prayer.detectingLocation"));
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [method, setMethod] = useState(2);
 
@@ -22,12 +24,12 @@ const PrayerTimesPage = () => {
               `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`
             );
             const data = await res.json();
-            setLocation(data.address?.city || data.address?.town || "Your Location");
+            setLocation(data.address?.city || data.address?.town || t("prayer.location"));
           } catch {
-            setLocation("Your Location");
+            setLocation(t("prayer.location"));
           }
         },
-        () => setLocation("Location unavailable")
+        () => setLocation(t("prayer.locationUnavailable"))
       );
     }
     return () => clearInterval(timer);
@@ -53,7 +55,6 @@ const PrayerTimesPage = () => {
       ]
     : [];
 
-  // Determine next prayer
   const now = currentTime;
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   let nextPrayerIdx = -1;
@@ -68,7 +69,7 @@ const PrayerTimesPage = () => {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Prayer Times" subtitle="أوقات الصلاة" icon={<Clock className="w-6 h-6" />}>
+      <PageHeader title={t("prayer.title")} subtitle={t("prayer.subtitle")} icon={<Clock className="w-6 h-6" />}>
         <div className="flex items-center gap-2 text-primary-foreground/60 text-xs">
           <MapPin className="w-3.5 h-3.5" />
           <span>{location}</span>
@@ -76,12 +77,11 @@ const PrayerTimesPage = () => {
       </PageHeader>
 
       <div className="px-4 py-4">
-        {/* Method selector */}
         <div className="mb-4">
           <Select value={method.toString()} onValueChange={(v) => setMethod(Number(v))}>
             <SelectTrigger className="h-10 text-xs bg-card border-border">
               <Settings2 className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="Calculation method" />
+              <SelectValue placeholder={t("prayer.calculationMethod")} />
             </SelectTrigger>
             <SelectContent>
               {CALCULATION_METHODS.map((m) => (
@@ -93,7 +93,6 @@ const PrayerTimesPage = () => {
           </Select>
         </div>
 
-        {/* Current time card */}
         <div className="p-5 rounded-2xl bg-card shadow-md text-center mb-4">
           <p className="text-3xl font-bold text-foreground">
             {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
@@ -109,12 +108,11 @@ const PrayerTimesPage = () => {
           {nextPrayerIdx >= 0 && (
             <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-light text-primary text-xs font-medium">
               <Bell className="w-3 h-3" />
-              Next: {prayerList[nextPrayerIdx].name} at {prayerList[nextPrayerIdx].time}
+              {t("prayer.next")} {prayerList[nextPrayerIdx].name} {t("prayer.at")} {prayerList[nextPrayerIdx].time}
             </div>
           )}
         </div>
 
-        {/* Prayer times list */}
         {isLoading || !timings ? (
           <div className="space-y-2">
             {Array.from({ length: 6 }).map((_, i) => (

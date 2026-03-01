@@ -3,6 +3,7 @@ import { HandHeart, BookOpen, Star, Heart, Shield, RotateCcw, Compass, Plane, Us
 import PageHeader from "@/components/PageHeader";
 import { DUA_DATA, type DuaCategory, type Dua } from "@/lib/duaData";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/lib/languageContext";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   book: BookOpen, star: Star, heart: Heart, shield: Shield,
@@ -10,6 +11,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const DuaPage = () => {
+  const { t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<DuaCategory | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const { toast } = useToast();
@@ -18,7 +20,7 @@ const DuaPage = () => {
     const text = `${dua.arabic}\n\n${dua.transliteration}\n\n${dua.translation}\n\n— ${dua.source}${dua.reference ? ` (${dua.reference})` : ""}`;
     navigator.clipboard.writeText(text);
     setCopiedId(dua.id);
-    toast({ title: "Copied to clipboard ✓" });
+    toast({ title: t("dua.copied") });
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -32,7 +34,7 @@ const DuaPage = () => {
             </button>
             <div className="flex-1">
               <h1 className="text-lg font-bold">{selectedCategory.title}</h1>
-              <p className="text-sm opacity-80 font-arabic">{selectedCategory.titleAr} · {selectedCategory.duas.length} duas</p>
+              <p className="text-sm opacity-80 font-arabic">{selectedCategory.titleAr} · {selectedCategory.duas.length} {t("dua.duas")}</p>
             </div>
           </div>
         </div>
@@ -44,22 +46,15 @@ const DuaPage = () => {
               className="p-5 rounded-2xl bg-card animate-slide-up space-y-4"
               style={{ animationDelay: `${i * 40}ms` }}
             >
-              {/* Arabic */}
               <p className="font-arabic text-right text-xl leading-loose text-foreground" dir="rtl" style={{ lineHeight: "2.2" }}>
                 {dua.arabic}
               </p>
-
-              {/* Transliteration */}
               <p className="text-sm text-primary italic leading-relaxed">
                 {dua.transliteration}
               </p>
-
-              {/* Translation */}
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {dua.translation}
               </p>
-
-              {/* Footer */}
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <span className="text-xs text-muted-foreground">
                   📖 {dua.source}{dua.reference ? ` — ${dua.reference}` : ""}
@@ -84,7 +79,7 @@ const DuaPage = () => {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Duas" subtitle="الدعاء" icon={<HandHeart className="w-6 h-6" />} />
+      <PageHeader title={t("dua.title")} subtitle={t("dua.subtitle")} icon={<HandHeart className="w-6 h-6" />} />
 
       <div className="px-4 py-4 space-y-2">
         {DUA_DATA.map((cat, i) => {
@@ -102,7 +97,7 @@ const DuaPage = () => {
               <div className="flex-1 text-left">
                 <p className="font-semibold text-foreground text-sm">{cat.title}</p>
                 <p className="font-arabic text-sm text-primary">{cat.titleAr}</p>
-                <p className="text-xs text-muted-foreground">{cat.duas.length} duas</p>
+                <p className="text-xs text-muted-foreground">{cat.duas.length} {t("dua.duas")}</p>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
             </button>

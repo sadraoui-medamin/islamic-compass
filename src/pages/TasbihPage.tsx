@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { CircleDot, RotateCcw, Plus, Trash2, ChevronLeft, ChevronRight, Minus, ArrowLeft } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { useLanguage } from "@/lib/languageContext";
 
 interface TasbihItem {
   id: string;
@@ -20,6 +21,7 @@ const defaultItems: TasbihItem[] = [
 type View = "list" | "counter";
 
 const TasbihPage = () => {
+  const { t } = useLanguage();
   const [items, setItems] = useState<TasbihItem[]>(defaultItems);
   const [activeIdx, setActiveIdx] = useState(0);
   const [count, setCount] = useState(0);
@@ -32,7 +34,6 @@ const TasbihPage = () => {
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const active = items[activeIdx];
-
   const progress = active ? Math.min((count / active.target) * 100, 100) : 0;
 
   // Auto-advance to next item when target reached
@@ -40,7 +41,6 @@ const TasbihPage = () => {
     setCount((c) => {
       const next = c + 1;
       if (active && next >= active.target && activeIdx < items.length - 1) {
-        // Auto-advance after a short delay
         setTimeout(() => {
           setSwipeAnim("left");
           setTimeout(() => {
@@ -114,7 +114,7 @@ const TasbihPage = () => {
   if (view === "list") {
     return (
       <div className="animate-fade-in">
-        <PageHeader title="Tasbih" subtitle="التسبيح" icon={<CircleDot className="w-6 h-6" />} />
+        <PageHeader title={t("tasbih.title")} subtitle={t("tasbih.subtitle")} icon={<CircleDot className="w-6 h-6" />} />
 
         <div className="px-4 py-4">
           {/* Item list */}
@@ -151,26 +151,26 @@ const TasbihPage = () => {
               <input
                 value={newArabic}
                 onChange={(e) => setNewArabic(e.target.value)}
-                placeholder="Arabic text (e.g. سبحان الله)"
+                placeholder={t("tasbih.arabicText")}
                 className="w-full px-3 py-2 rounded-xl bg-muted text-foreground text-sm placeholder:text-muted-foreground outline-none font-arabic"
                 dir="rtl"
               />
               <input
                 value={newEnglish}
                 onChange={(e) => setNewEnglish(e.target.value)}
-                placeholder="English name"
+                placeholder={t("tasbih.englishName")}
                 className="w-full px-3 py-2 rounded-xl bg-muted text-foreground text-sm placeholder:text-muted-foreground outline-none"
               />
               <input
                 type="number"
                 value={newTarget}
                 onChange={(e) => setNewTarget(e.target.value)}
-                placeholder="Target count"
+                placeholder={t("tasbih.targetCount")}
                 className="w-full px-3 py-2 rounded-xl bg-muted text-foreground text-sm placeholder:text-muted-foreground outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <div className="flex gap-2">
-                <button onClick={() => setShowAdd(false)} className="flex-1 py-2 rounded-xl bg-muted text-foreground text-sm">Cancel</button>
-                <button onClick={addItem} className="flex-1 py-2 rounded-xl islamic-gradient text-primary-foreground text-sm shadow-md">Add</button>
+                <button onClick={() => setShowAdd(false)} className="flex-1 py-2 rounded-xl bg-muted text-foreground text-sm">{t("tasbih.cancel")}</button>
+                <button onClick={addItem} className="flex-1 py-2 rounded-xl islamic-gradient text-primary-foreground text-sm shadow-md">{t("tasbih.add")}</button>
               </div>
             </div>
           ) : (
@@ -178,7 +178,7 @@ const TasbihPage = () => {
               onClick={() => setShowAdd(true)}
               className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-2xl border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors text-sm"
             >
-              <Plus className="w-4 h-4" /> Add Custom Tasbih
+              <Plus className="w-4 h-4" /> {t("tasbih.addCustom")}
             </button>
           )}
         </div>
@@ -233,7 +233,7 @@ const TasbihPage = () => {
           <span className="text-sm text-muted-foreground mt-1">/ {active?.target}</span>
         </button>
 
-        <p className="text-xs text-muted-foreground mt-4">Tap to count · Swipe for next</p>
+        <p className="text-xs text-muted-foreground mt-4">{t("tasbih.tapToCount")}</p>
 
         {/* Action buttons */}
         <div className="flex items-center gap-3 mt-6">

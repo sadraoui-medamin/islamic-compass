@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Compass } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { useLanguage } from "@/lib/languageContext";
 
 const QiblaPage = () => {
+  const { t } = useLanguage();
   const [heading, setHeading] = useState(0);
   const [qiblaAngle, setQiblaAngle] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +16,6 @@ const QiblaPage = () => {
         (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
-          // Kaaba coordinates
           const kaabaLat = 21.4225;
           const kaabaLng = 39.8262;
           const latRad = (lat * Math.PI) / 180;
@@ -29,7 +30,7 @@ const QiblaPage = () => {
           setQiblaAngle(angle);
           setHasLocation(true);
         },
-        () => setError("Please enable location services to find Qibla direction.")
+        () => setError(t("qibla.enableLocation"))
       );
     }
 
@@ -44,7 +45,7 @@ const QiblaPage = () => {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Qibla" subtitle="القبلة" icon={<Compass className="w-6 h-6" />} />
+      <PageHeader title={t("qibla.title")} subtitle={t("qibla.subtitle")} icon={<Compass className="w-6 h-6" />} />
 
       <div className="px-4 py-8 flex flex-col items-center">
         {error ? (
@@ -54,24 +55,20 @@ const QiblaPage = () => {
           </div>
         ) : (
           <>
-            {/* Compass */}
             <div className="relative w-64 h-64">
               <div
                 className="w-full h-full rounded-full bg-card shadow-xl border-4 border-border flex items-center justify-center transition-transform duration-200"
                 style={{ transform: `rotate(${rotation}deg)` }}
               >
-                {/* Kaaba marker */}
                 <div className="absolute top-2 left-1/2 -translate-x-1/2 flex flex-col items-center">
                   <div className="w-4 h-4 rounded-sm bg-foreground rotate-45" />
-                  <span className="text-[10px] font-bold text-foreground mt-1">Kaaba</span>
+                  <span className="text-[10px] font-bold text-foreground mt-1">{t("qibla.kaaba")}</span>
                 </div>
-                {/* Cardinal directions */}
                 <span className="absolute top-8 left-1/2 -translate-x-1/2 text-xs font-bold text-primary">N</span>
                 <span className="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">S</span>
                 <span className="absolute left-8 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">W</span>
                 <span className="absolute right-8 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">E</span>
 
-                {/* Inner circles */}
                 <div className="w-32 h-32 rounded-full border-2 border-border flex items-center justify-center">
                   <div className="w-16 h-16 rounded-full islamic-gradient flex items-center justify-center shadow-md">
                     <Compass className="w-8 h-8 text-primary-foreground" />
@@ -83,10 +80,10 @@ const QiblaPage = () => {
             <div className="mt-8 text-center">
               <p className="font-arabic text-2xl text-primary">القبلة</p>
               <p className="text-sm text-muted-foreground mt-1">
-                {hasLocation ? `${Math.round(qiblaAngle)}° from North` : "Getting location..."}
+                {hasLocation ? `${Math.round(qiblaAngle)}${t("qibla.fromNorth")}` : t("qibla.gettingLocation")}
               </p>
               <p className="text-xs text-muted-foreground mt-3 max-w-[250px]">
-                Point your phone towards the Kaaba marker for accurate Qibla direction
+                {t("qibla.pointPhone")}
               </p>
             </div>
           </>

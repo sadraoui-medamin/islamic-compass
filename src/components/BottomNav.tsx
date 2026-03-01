@@ -1,22 +1,25 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { BookOpen, Sun, HandHeart, CircleDot, Compass, Clock, Menu } from "lucide-react";
+import { useLanguage } from "@/lib/languageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 interface BottomNavProps {
   onSettingsClick: () => void;
 }
 
-const navItems = [
-  { path: "/", icon: BookOpen, label: "Quran" },
-  { path: "/adhkar", icon: Sun, label: "Adhkar" },
-  { path: "/dua", icon: HandHeart, label: "Dua" },
-  { path: "/tasbih", icon: CircleDot, label: "Tasbih" },
-  { path: "/qibla", icon: Compass, label: "Qibla" },
-  { path: "/prayer", icon: Clock, label: "Prayer" },
+const navItems: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }[] = [
+  { path: "/", icon: BookOpen, labelKey: "nav.quran" },
+  { path: "/adhkar", icon: Sun, labelKey: "nav.adhkar" },
+  { path: "/dua", icon: HandHeart, labelKey: "nav.dua" },
+  { path: "/tasbih", icon: CircleDot, labelKey: "nav.tasbih" },
+  { path: "/qibla", icon: Compass, labelKey: "nav.qibla" },
+  { path: "/prayer", icon: Clock, labelKey: "nav.prayer" },
 ];
 
 const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-card/95 backdrop-blur-lg border-t border-border z-50"
@@ -38,7 +41,7 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
               <div className={`p-1.5 rounded-xl transition-all ${isActive ? "islamic-gradient text-primary-foreground shadow-md" : ""}`}>
                 <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.2 : 1.8} />
               </div>
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="text-[10px] font-medium">{t(item.labelKey)}</span>
             </button>
           );
         })}
@@ -49,7 +52,7 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
           <div className="p-1.5">
             <Menu className="w-5 h-5" strokeWidth={1.8} />
           </div>
-          <span className="text-[10px] font-medium">More</span>
+          <span className="text-[10px] font-medium">{t("nav.more")}</span>
         </button>
       </div>
     </nav>

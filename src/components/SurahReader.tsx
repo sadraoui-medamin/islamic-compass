@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
+import AyahActionsPopover from "@/components/AyahActionsPopover";
+import TafsirModal from "@/components/TafsirModal";
 
 interface SurahReaderProps {
   surahNumber: number;
@@ -29,6 +31,7 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }:
   const [loopMode, setLoopMode] = useState<LoopMode>("none");
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [tafsirAyah, setTafsirAyah] = useState<{ ayahNumber: number } | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ayahRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const { toast } = useToast();
@@ -275,49 +278,54 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }:
         )}
 
         {data?.text?.ayahs.map((ayah, i) => (
-          <div
+          <AyahActionsPopover
             key={ayah.numberInSurah}
-            ref={(el) => { ayahRefs.current[ayah.numberInSurah] = el; }}
-            data-ayah-idx={i}
-            className={`p-4 rounded-2xl transition-all duration-200 ${
-              playingAyah === i ? "bg-primary/10 ring-2 ring-primary/30" : "bg-card hover:bg-muted"
-            }`}
+            ayahText={ayah.text}
+            ayahNumber={ayah.numberInSurah}
+            surahName={surahName}
+            isBookmarked={bookmarkedAyahs.has(ayah.numberInSurah)}
+            onPlay={() => playAyah(i)}
+            onRepeat={() => { /* repeat handled via loop mode */ playAyah(i); }}
+            onBookmark={() => toggleBookmark(ayah)}
+            onTafsir={() => setTafsirAyah({ ayahNumber: ayah.numberInSurah })}
           >
-            <div className="flex items-start gap-3 mb-2">
-              <div className="flex flex-col items-center gap-1">
-                <button
-                  onClick={() => playAyah(i)}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold transition ${
-                    playingAyah === i ? "islamic-gradient text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-primary/10"
-                  }`}
-                >
-                  {playingAyah === i && isPlaying ? <Pause className="w-3.5 h-3.5" /> : ayah.numberInSurah}
-                </button>
-                <button
-                  onClick={() => toggleBookmark(ayah)}
-                  className="p-1 rounded-md hover:bg-muted transition-colors"
-                >
+            <div
+              ref={(el) => { ayahRefs.current[ayah.numberInSurah] = el; }}
+              data-ayah-idx={i}
+              className={`p-4 rounded-2xl transition-all duration-200 cursor-pointer ${
+                playingAyah === i ? "bg-primary/10 ring-2 ring-primary/30" : "bg-card hover:bg-muted"
+              }`}
+            >
+              <div className="flex items-start gap-3 mb-2">
+                <div className="flex flex-col items-center gap-1">
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold transition ${
+                      playingAyah === i ? "islamic-gradient text-primary-foreground" : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {playingAyah === i && isPlaying ? <Pause className="w-3.5 h-3.5" /> : ayah.numberInSurah}
+                  </div>
                   {bookmarkedAyahs.has(ayah.numberInSurah) ? (
                     <BookmarkCheck className="w-4 h-4 text-primary" />
                   ) : (
                     <Bookmark className="w-4 h-4 text-muted-foreground" />
                   )}
-                </button>
+                </div>
+                <p
+                  className="font-arabic text-right leading-loose flex-1 text-foreground"
+                  style={{ fontSize: `${fontSize}px`, lineHeight: "2.2" }}
+                  dir="rtl"
+                >
+                  {ayah.text}
+                </p>
               </div>
-              <p
-                className="font-arabic text-right leading-loose flex-1 text-foreground"
-                style={{ fontSize: `${fontSize}px`, lineHeight: "2.2" }}
-                dir="rtl"
-              >
-                {ayah.text}
-              </p>
+              {data.translation?.ayahs[i] && (
+                <p className="text-sm text-muted-foreground pl-11 leading-relaxed">
+                  {data.translation.ayahs[i].text}
+                </p>
+              )}
             </div>
-            {data.translation?.ayahs[i] && (
-              <p className="text-sm text-muted-foreground pl-11 leading-relaxed">
-                {data.translation.ayahs[i].text}
-              </p>
-            )}
-          </div>
+          </AyahActionsPopover>
         ))}
 
         {isLoading && (
@@ -327,6 +335,15 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }:
           </div>
         )}
       </div>
+
+      {tafsirAyah && (
+        <TafsirModal
+          surahNumber={surahNumber}
+          ayahNumber={tafsirAyah.ayahNumber}
+          surahName={surahName}
+          onClose={() => setTafsirAyah(null)}
+        />
+      )}
     </div>
   );
 };

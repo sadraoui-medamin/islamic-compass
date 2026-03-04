@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import AyahActionsPopover from "@/components/AyahActionsPopover";
+import TafsirModal from "@/components/TafsirModal";
 
 type MushafTheme = "light" | "brown" | "darkblue" | "dark";
 
@@ -32,6 +33,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
   const [reciter, setReciter] = useState(RECITERS[0].id);
   const [playingKey, setPlayingKey] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [tafsirAyah, setTafsirAyah] = useState<{ surahNumber: number; ayahNumber: number; surahName: string } | null>(null);
   const [swipeAnim, setSwipeAnim] = useState<"left" | "right" | null>(null);
   const [mushafTheme, setMushafTheme] = useState<MushafTheme>("brown");
   const [immersive, setImmersive] = useState(false);
@@ -403,6 +405,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
                       onPlay={() => playAyahAudio(group.surahNumber, ayah.numberInSurah)}
                       onRepeat={() => repeatAyahAudio(group.surahNumber, ayah.numberInSurah)}
                       onBookmark={() => toggleBookmark(group.surahNumber, ayah)}
+                      onTafsir={() => setTafsirAyah({ surahNumber: group.surahNumber, ayahNumber: ayah.numberInSurah, surahName: group.surahName })}
                     >
                       <span
                         className={`cursor-pointer transition-colors rounded-sm px-0.5 ${
@@ -452,6 +455,15 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
           </div>
         )}
       </div>
+
+      {tafsirAyah && (
+        <TafsirModal
+          surahNumber={tafsirAyah.surahNumber}
+          ayahNumber={tafsirAyah.ayahNumber}
+          surahName={tafsirAyah.surahName}
+          onClose={() => setTafsirAyah(null)}
+        />
+      )}
     </div>
   );
 };

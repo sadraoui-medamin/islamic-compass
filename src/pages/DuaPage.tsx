@@ -11,7 +11,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const DuaPage = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const isArabic = lang === "ar";
   const [selectedCategory, setSelectedCategory] = useState<DuaCategory | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const { toast } = useToast();
@@ -49,12 +50,16 @@ const DuaPage = () => {
               <p className="font-arabic text-right text-xl leading-loose text-foreground" dir="rtl" style={{ lineHeight: "2.2" }}>
                 {dua.arabic}
               </p>
-              <p className="text-sm text-primary italic leading-relaxed">
-                {dua.transliteration}
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {dua.translation}
-              </p>
+              {!isArabic && (
+                <p className="text-sm text-primary italic leading-relaxed">
+                  {dua.transliteration}
+                </p>
+              )}
+              {!isArabic && (
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {dua.translation}
+                </p>
+              )}
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <span className="text-xs text-muted-foreground">
                   📖 {dua.source}{dua.reference ? ` — ${dua.reference}` : ""}

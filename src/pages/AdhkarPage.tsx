@@ -7,7 +7,8 @@ import { useLanguage } from "@/lib/languageContext";
 const iconMap: Record<string, React.ElementType> = { sun: Sun, moon: Moon, star: Star };
 
 const AdhkarPage = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const isArabic = lang === "ar";
   const [selectedCategory, setSelectedCategory] = useState<AdhkarCategory | null>(null);
   const [counters, setCounters] = useState<Record<number, number>>({});
 
@@ -75,12 +76,16 @@ const AdhkarPage = () => {
                   <p className="font-arabic text-right text-lg leading-loose text-foreground" dir="rtl">
                     {dhikr.arabic}
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2 italic">
-                    {dhikr.transliteration}
-                  </p>
-                  <p className="text-sm text-foreground/80 mt-1">
-                    {dhikr.translation}
-                  </p>
+                  {!isArabic && (
+                    <p className="text-sm text-muted-foreground mt-2 italic">
+                      {dhikr.transliteration}
+                    </p>
+                  )}
+                  {!isArabic && (
+                    <p className="text-sm text-foreground/80 mt-1">
+                      {dhikr.translation}
+                    </p>
+                  )}
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {dhikr.source}

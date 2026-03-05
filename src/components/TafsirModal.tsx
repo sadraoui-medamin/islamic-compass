@@ -103,19 +103,28 @@ const TafsirModal = ({ surahNumber, ayahNumber, surahName, onClose }: TafsirModa
             </div>
           ) : (
             <div>
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
                 <button
                   onClick={() => { setSelectedEdition(null); setTafsirText(null); }}
-                  className="text-xs text-primary hover:underline"
+                  className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition font-medium"
                 >
-                  ← تفاسير أخرى
+                  <BookOpen className="w-3.5 h-3.5" />
+                  تفاسير أخرى
                 </button>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs font-bold text-foreground font-arabic">
                   {TAFSIR_EDITIONS.find(e => e.slug === selectedEdition)?.nameAr}
                 </span>
               </div>
-              <div className="font-arabic text-right text-foreground leading-loose text-base" dir="rtl" style={{ lineHeight: "2.2" }}>
-                {tafsirText}
+              <div
+                className="font-arabic text-right text-foreground text-base rounded-xl bg-muted/40 p-4"
+                dir="rtl"
+                style={{ lineHeight: "2.4", fontSize: "17px", textAlign: "justify" }}
+              >
+                {tafsirText?.split('\n').map((paragraph, i) => (
+                  <p key={i} className={i > 0 ? "mt-3" : ""}>
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             </div>
           )}

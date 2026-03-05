@@ -231,22 +231,18 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
             </button>
           </div>
 
-          {/* Theme selector */}
-          <div className="flex gap-1.5 mb-3">
-            {MUSHAF_THEMES.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setMushafTheme(t.id)}
-                className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-medium transition ${
-                  mushafTheme === t.id
-                    ? "bg-primary-foreground/25 text-primary-foreground"
-                    : "bg-primary-foreground/8 text-primary-foreground/60 hover:bg-primary-foreground/15"
-                }`}
-              >
-                {t.icon}
-                {t.label}
-              </button>
-            ))}
+          {/* Theme cycle button */}
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => {
+                const idx = MUSHAF_THEMES.findIndex(t => t.id === mushafTheme);
+                setMushafTheme(MUSHAF_THEMES[(idx + 1) % MUSHAF_THEMES.length].id);
+              }}
+              className="flex items-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium bg-primary-foreground/15 text-primary-foreground hover:bg-primary-foreground/25 transition"
+            >
+              {theme.icon}
+              <span>{theme.label}</span>
+            </button>
           </div>
 
           <div className="flex gap-2 items-center">

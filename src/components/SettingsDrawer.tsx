@@ -70,8 +70,7 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
 
   const menuItems = [
     { icon: Heart, label: t("settings.donate"), desc: t("settings.donateDesc"), page: "donate" as SubPage },
-    // Hide language option when Arabic is selected
-    ...(lang !== "ar" ? [{ icon: Globe, label: t("settings.language"), desc: languages.find((l) => l.code === lang)?.label || "English", page: "language" as SubPage }] : []),
+    { icon: Globe, label: t("settings.language"), desc: languages.find((l) => l.code === lang)?.label || "العربية", page: "language" as SubPage },
     { icon: Palette, label: t("settings.theme"), desc: theme === "dark" ? t("settings.themeDark") : theme === "eyecare" ? t("settings.themeEyecare") : t("settings.themeLight"), page: "theme" as SubPage },
     { icon: Bell, label: t("settings.notifications"), desc: t("settings.notificationsDesc"), page: "notifications" as SubPage },
     { icon: Info, label: t("settings.about"), desc: t("settings.aboutDesc"), page: "about" as SubPage },

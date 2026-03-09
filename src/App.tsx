@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/lib/languageContext";
 import AppLayout from "./components/AppLayout";
+import HomePage from "./pages/HomePage";
 import QuranPage from "./pages/QuranPage";
 import AdhkarPage from "./pages/AdhkarPage";
 import DuaPage from "./pages/DuaPage";

@@ -25,7 +25,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route element={<AppLayout />}>
-              <Route path="/" element={<QuranPage />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/quran" element={<QuranPage />} />
               <Route path="/adhkar" element={<AdhkarPage />} />
               <Route path="/dua" element={<DuaPage />} />
               <Route path="/tasbih" element={<TasbihPage />} />

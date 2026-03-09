@@ -141,6 +141,9 @@ const TafsirModal = ({ surahNumber, ayahNumber, surahName, onClose }: TafsirModa
           )}
         </div>
       </div>
+      {showBulkDownload && (
+        <TafsirDownloadManager onClose={() => { setShowBulkDownload(false); /* refresh */ const map: Record<string, boolean> = {}; TAFSIR_EDITIONS.forEach(ed => { map[ed.slug] = isTafsirDownloaded(ed.slug, surahNumber); }); setDownloadedMap(map); }} />
+      )}
     </div>
   );
 };

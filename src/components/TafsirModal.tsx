@@ -74,7 +74,16 @@ const TafsirModal = ({ surahNumber, ayahNumber, surahName, onClose }: TafsirModa
         <div className="flex-1 overflow-y-auto p-4">
           {!selectedEdition ? (
             <div className="space-y-2">
-              <p className="text-xs text-muted-foreground mb-3">اختر التفسير — يتم تحميله مرة واحدة فقط</p>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs text-muted-foreground">اختر التفسير — يتم تحميله مرة واحدة فقط</p>
+                <button
+                  onClick={() => setShowBulkDownload(true)}
+                  className="flex items-center gap-1 text-xs text-primary font-medium hover:text-primary/80 transition"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  تحميل الكل
+                </button>
+              </div>
               {TAFSIR_EDITIONS.map(ed => {
                 const isDownloaded = downloadedMap[ed.slug];
                 const isDownloading = downloading === ed.slug;

@@ -16,6 +16,7 @@ const TafsirModal = ({ surahNumber, ayahNumber, surahName, onClose }: TafsirModa
   const [tafsirText, setTafsirText] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [downloadedMap, setDownloadedMap] = useState<Record<string, boolean>>({});
+  const [showBulkDownload, setShowBulkDownload] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {

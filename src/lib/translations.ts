@@ -2,6 +2,7 @@ export type Language = "ar" | "en" | "fr";
 
 export const translations = {
   // Bottom nav
+  "nav.home": { ar: "الرئيسية", en: "Home", fr: "Accueil" },
   "nav.quran": { ar: "القرآن", en: "Quran", fr: "Coran" },
   "nav.adhkar": { ar: "الأذكار", en: "Adhkar", fr: "Adhkar" },
   "nav.dua": { ar: "الدعاء", en: "Dua", fr: "Doua" },

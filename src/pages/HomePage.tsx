@@ -238,9 +238,9 @@ const HomePage = () => {
               <p className="font-arabic text-base text-foreground text-right" dir="rtl">{QUIZ_QUESTIONS[quizIdx].q}</p>
               <div className="grid grid-cols-2 gap-2">
                 {QUIZ_QUESTIONS[quizIdx].options.map((opt, i) => {
-                  let cls = "bg-muted hover:bg-muted/80";
+                  let cls = "bg-muted hover:bg-muted/80 border border-transparent";
                   if (quizAnswer !== null) {
-                    if (i === QUIZ_QUESTIONS[quizIdx].correct) cls = "bg-green-500/20 border-green-500/40";
+                    if (i === QUIZ_QUESTIONS[quizIdx].correct) cls = "bg-primary/20 border-primary/40";
                     else if (i === quizAnswer) cls = "bg-destructive/20 border-destructive/40";
                   }
                   return (

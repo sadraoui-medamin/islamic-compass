@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Download, Loader2, Check, BookOpen } from "lucide-react";
 import { TAFSIR_EDITIONS, downloadTafsir, isTafsirDownloaded, getTafsirForAyah } from "@/lib/tafsirApi";
 import { useToast } from "@/hooks/use-toast";
+import TafsirDownloadManager from "./TafsirDownloadManager";
 
 interface TafsirModalProps {
   surahNumber: number;

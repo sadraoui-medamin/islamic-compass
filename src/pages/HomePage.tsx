@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import { Progress } from "@/components/ui/progress";
+import Achievements from "@/components/Achievements";
+import DailyReminder from "@/components/DailyReminder";
 
 // --- Helpers ---
 function getLoginStreak(): number {

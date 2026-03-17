@@ -288,6 +288,12 @@ const HomePage = () => {
           )}
         </div>
 
+        {/* Achievements */}
+        <Achievements />
+
+        {/* Daily Reminders */}
+        <DailyReminder />
+
         {/* Tafsir download shortcut */}
         <button onClick={() => navigate("/quran")}
           className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-card hover:bg-muted transition">

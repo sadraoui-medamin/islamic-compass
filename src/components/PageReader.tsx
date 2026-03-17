@@ -28,6 +28,16 @@ interface PageReaderProps {
 const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
   const [currentPage, setCurrentPage] = useState(pageNumber || 1);
   const [readingVersion, setReadingVersion] = useState(READING_VERSIONS[0].id);
+
+  // Track pages read
+  useEffect(() => {
+    const read = new Set(JSON.parse(localStorage.getItem("quran-pages-set") || "[]"));
+    if (!read.has(currentPage)) {
+      read.add(currentPage);
+      localStorage.setItem("quran-pages-set", JSON.stringify([...read]));
+      localStorage.setItem("quran-pages-read", String(read.size));
+    }
+  }, [currentPage]);
   const [fontSize, setFontSize] = useState(22);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Set<string>>(new Set());
   const [reciter, setReciter] = useState(RECITERS[0].id);

@@ -48,6 +48,10 @@ const TafsirModal = ({ surahNumber, ayahNumber, surahName, onClose }: TafsirModa
     if (text) {
       setSelectedEdition(slug);
       setTafsirText(text);
+      // Track tafsir reads
+      const prev = parseInt(localStorage.getItem("tafsir-read") || "0", 10);
+      localStorage.setItem("tafsir-read", String(prev + 1));
+      localStorage.setItem("last-activity", `Tafsir ${TAFSIR_EDITIONS.find(e => e.slug === slug)?.name || slug}`);
     }
   };
 

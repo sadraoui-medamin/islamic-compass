@@ -40,6 +40,10 @@ const TasbihPage = () => {
   const handleTap = useCallback(() => {
     setCount((c) => {
       const next = c + 1;
+      // Track total tasbih count
+      const prev = parseInt(localStorage.getItem("tasbih-total") || "0", 10);
+      localStorage.setItem("tasbih-total", String(prev + 1));
+      localStorage.setItem("last-activity", active?.english || "Tasbih");
       if (active && next >= active.target && activeIdx < items.length - 1) {
         setTimeout(() => {
           setSwipeAnim("left");

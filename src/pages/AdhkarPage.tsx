@@ -15,7 +15,14 @@ const AdhkarPage = () => {
   const handleCount = (dhikr: Dhikr) => {
     const current = counters[dhikr.id] || 0;
     if (current < dhikr.repeat) {
-      setCounters((prev) => ({ ...prev, [dhikr.id]: current + 1 }));
+      const newCount = current + 1;
+      setCounters((prev) => ({ ...prev, [dhikr.id]: newCount }));
+      // Track completed adhkar
+      if (newCount >= dhikr.repeat) {
+        const prev = parseInt(localStorage.getItem("adhkar-done") || "0", 10);
+        localStorage.setItem("adhkar-done", String(prev + 1));
+        localStorage.setItem("last-activity", selectedCategory?.title || "Adhkar");
+      }
     }
   };
 

@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Sun, Home, Compass, Clock, Menu } from "lucide-react";
+import { BookOpen, Sun, Home, HandHeart, Clock, Menu } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import type { TranslationKey } from "@/lib/translations";
 
@@ -9,11 +9,11 @@ interface BottomNavProps {
 
 const leftItems: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }[] = [
   { path: "/quran", icon: BookOpen, labelKey: "nav.quran" },
-  { path: "/adhkar", icon: Sun, labelKey: "nav.adhkar" },
+  { path: "/dua", icon: HandHeart, labelKey: "nav.dua" },
 ];
 
 const rightItems: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }[] = [
-  { path: "/qibla", icon: Compass, labelKey: "nav.qibla" },
+  { path: "/adhkar", icon: Sun, labelKey: "nav.adhkar" },
   { path: "/prayer", icon: Clock, labelKey: "nav.prayer" },
 ];
 
@@ -28,16 +28,16 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
       <button
         key={item.path}
         onClick={() => navigate(item.path)}
-        className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 min-w-[3rem] ${
+        className={`flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-200 min-w-[2.8rem] ${
           isActive
             ? "text-primary scale-105"
             : "text-muted-foreground hover:text-foreground"
         }`}
       >
         <div className={`p-1.5 rounded-xl transition-all ${isActive ? "islamic-gradient text-primary-foreground shadow-md" : ""}`}>
-          <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.2 : 1.8} />
+          <item.icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
         </div>
-        <span className="text-[10px] font-medium">{t(item.labelKey)}</span>
+        <span className="text-[9px] font-medium leading-tight">{t(item.labelKey)}</span>
       </button>
     );
   };
@@ -49,17 +49,16 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
       className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      {/* Glass background */}
       <div
-        className="mx-2 mb-2 rounded-2xl border border-border/50"
+        className="mx-2 mb-2 rounded-2xl border border-border/40"
         style={{
-          background: "hsl(var(--card) / 0.7)",
-          backdropFilter: "blur(20px) saturate(1.8)",
-          WebkitBackdropFilter: "blur(20px) saturate(1.8)",
-          boxShadow: "0 -4px 30px hsl(var(--primary) / 0.06), 0 2px 12px hsl(0 0% 0% / 0.08)",
+          background: "hsl(var(--card) / 0.65)",
+          backdropFilter: "blur(24px) saturate(1.8)",
+          WebkitBackdropFilter: "blur(24px) saturate(1.8)",
+          boxShadow: "0 -4px 30px hsl(var(--primary) / 0.06), 0 2px 16px hsl(0 0% 0% / 0.1)",
         }}
       >
-        <div className="flex items-center justify-around py-1.5 relative">
+        <div className="flex items-center justify-around py-1 relative">
           {/* Left items */}
           {leftItems.map(renderItem)}
 
@@ -69,20 +68,20 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
             className="flex flex-col items-center gap-0.5 -mt-6"
           >
             <div
-              className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all ${
+              className={`w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
                 isHomeActive
                   ? "islamic-gradient scale-110"
                   : "islamic-gradient opacity-85 hover:opacity-100 hover:scale-105"
               }`}
               style={{
                 boxShadow: isHomeActive
-                  ? "0 4px 20px hsl(var(--primary) / 0.4)"
-                  : "0 4px 14px hsl(var(--primary) / 0.2)",
+                  ? "0 4px 20px hsl(var(--primary) / 0.45), 0 0 0 3px hsl(var(--card) / 0.5)"
+                  : "0 4px 14px hsl(var(--primary) / 0.2), 0 0 0 3px hsl(var(--card) / 0.5)",
               }}
             >
-              <Home className="w-6 h-6 text-primary-foreground" strokeWidth={2} />
+              <Home className="w-5 h-5 text-primary-foreground" strokeWidth={2.2} />
             </div>
-            <span className={`text-[10px] font-semibold mt-0.5 ${isHomeActive ? "text-primary" : "text-muted-foreground"}`}>
+            <span className={`text-[9px] font-semibold mt-0.5 ${isHomeActive ? "text-primary" : "text-muted-foreground"}`}>
               {t("nav.home")}
             </span>
           </button>
@@ -93,12 +92,12 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
           {/* Settings */}
           <button
             onClick={onSettingsClick}
-            className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-muted-foreground hover:text-foreground transition-all min-w-[3rem]"
+            className="flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl text-muted-foreground hover:text-foreground transition-all min-w-[2.8rem]"
           >
             <div className="p-1.5">
-              <Menu className="w-5 h-5" strokeWidth={1.8} />
+              <Menu className="w-[18px] h-[18px]" strokeWidth={1.8} />
             </div>
-            <span className="text-[10px] font-medium">{t("nav.more")}</span>
+            <span className="text-[9px] font-medium leading-tight">{t("nav.more")}</span>
           </button>
         </div>
       </div>

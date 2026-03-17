@@ -131,6 +131,12 @@ const HomePage = () => {
         setQuizAnswer(null);
       } else {
         setQuizDone(true);
+        // Track quiz completion for achievements
+        const done = JSON.parse(localStorage.getItem("quiz-completed") || "[]");
+        if (!done.includes(quizCat.id)) {
+          done.push(quizCat.id);
+          localStorage.setItem("quiz-completed", JSON.stringify(done));
+        }
       }
     }, 800);
   };

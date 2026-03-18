@@ -1,30 +1,14 @@
 import { useState, useEffect } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
+  Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  Heart,
-  Globe,
-  Palette,
-  Bell,
-  Info,
-  MessageCircle,
-  Star,
-  Shield,
-  ChevronRight,
-  ArrowLeft,
-  Sun,
-  Moon,
-  Eye,
-  Check,
-  Mail,
-  ExternalLink,
+  Heart, Globe, Palette, Bell, Info, MessageCircle, Star, Shield, ChevronRight,
+  ArrowLeft, Sun, Moon, Eye, Check, Mail, ExternalLink, Trophy,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useLanguage } from "@/lib/languageContext";
+import { useNavigate } from "react-router-dom";
 
 interface SettingsDrawerProps {
   open: boolean;
@@ -42,6 +26,7 @@ const languages = [
 const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
   const [subPage, setSubPage] = useState<SubPage>(null);
   const { lang, setLang, t } = useLanguage();
+  const navigate = useNavigate();
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("app-theme") || "light";
@@ -49,10 +34,7 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
     return "light";
   });
   const [notifs, setNotifs] = useState({
-    prayer: true,
-    adhkar: true,
-    morning: true,
-    evening: true,
+    prayer: true, adhkar: true, morning: true, evening: true,
   });
 
   useEffect(() => {
@@ -63,12 +45,10 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
     localStorage.setItem("app-theme", theme);
   }, [theme]);
 
-  const handleClose = () => {
-    setSubPage(null);
-    onOpenChange(false);
-  };
+  const handleClose = () => { setSubPage(null); onOpenChange(false); };
 
   const menuItems = [
+    { icon: Trophy, label: lang === "ar" ? "إنجازاتي" : "My Achievements", desc: lang === "ar" ? "شاراتك وتقدمك" : "Your badges & progress", action: () => { handleClose(); navigate("/achievements"); } },
     { icon: Heart, label: t("settings.donate"), desc: t("settings.donateDesc"), page: "donate" as SubPage },
     { icon: Globe, label: t("settings.language"), desc: languages.find((l) => l.code === lang)?.label || "العربية", page: "language" as SubPage },
     { icon: Palette, label: t("settings.theme"), desc: theme === "dark" ? t("settings.themeDark") : theme === "eyecare" ? t("settings.themeEyecare") : t("settings.themeLight"), page: "theme" as SubPage },
@@ -100,16 +80,9 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
                 { key: "dark", label: t("settings.themeDark"), desc: t("settings.themeDarkDesc"), icon: Moon },
                 { key: "eyecare", label: t("settings.themeEyecare"), desc: t("settings.themeEyecareDesc"), icon: Eye },
               ].map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => setTheme(item.key)}
-                  className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all ${
-                    theme === item.key ? "bg-primary/10 border border-primary/30" : "hover:bg-muted border border-transparent"
-                  }`}
-                >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    theme === item.key ? "islamic-gradient text-primary-foreground" : "bg-emerald-light"
-                  }`}>
+                <button key={item.key} onClick={() => setTheme(item.key)}
+                  className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all ${theme === item.key ? "bg-primary/10 border border-primary/30" : "hover:bg-muted border border-transparent"}`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === item.key ? "islamic-gradient text-primary-foreground" : "bg-emerald-light"}`}>
                     <item.icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1 text-left">
@@ -122,20 +95,14 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
             </div>
           </div>
         );
-
       case "language":
         return (
           <div>
             <SubPageHeader title={t("settings.language")} />
             <div className="p-4 space-y-2">
               {languages.map((l) => (
-                <button
-                  key={l.code}
-                  onClick={() => setLang(l.code)}
-                  className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all ${
-                    lang === l.code ? "bg-primary/10 border border-primary/30" : "hover:bg-muted border border-transparent"
-                  }`}
-                >
+                <button key={l.code} onClick={() => setLang(l.code)}
+                  className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all ${lang === l.code ? "bg-primary/10 border border-primary/30" : "hover:bg-muted border border-transparent"}`}>
                   <span className="text-2xl">{l.flag}</span>
                   <p className="text-sm font-medium text-foreground flex-1 text-left">{l.label}</p>
                   {lang === l.code && <Check className="w-5 h-5 text-primary" />}
@@ -144,7 +111,6 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
             </div>
           </div>
         );
-
       case "notifications":
         return (
           <div>
@@ -161,16 +127,12 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
                     <p className="text-sm font-medium text-foreground">{n.label}</p>
                     <p className="text-xs text-muted-foreground">{n.desc}</p>
                   </div>
-                  <Switch
-                    checked={notifs[n.key]}
-                    onCheckedChange={(val) => setNotifs((prev) => ({ ...prev, [n.key]: val }))}
-                  />
+                  <Switch checked={notifs[n.key]} onCheckedChange={(val) => setNotifs((prev) => ({ ...prev, [n.key]: val }))} />
                 </div>
               ))}
             </div>
           </div>
         );
-
       case "about":
         return (
           <div>
@@ -183,9 +145,7 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
                 <h3 className="text-lg font-bold text-foreground">{t("settings.aboutTitle")}</h3>
                 <p className="text-sm text-muted-foreground">Version 1.0.0</p>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {t("settings.aboutBody")}
-              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t("settings.aboutBody")}</p>
               <div className="pt-4 border-t border-border text-xs text-muted-foreground space-y-1">
                 <p className="font-arabic text-lg text-primary">بسم الله الرحمن الرحيم</p>
                 <p>© 2026 Islamic App. All rights reserved.</p>
@@ -193,7 +153,6 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
             </div>
           </div>
         );
-
       case "contact":
         return (
           <div>
@@ -204,10 +163,7 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
                 <p className="text-sm text-foreground font-medium">{t("settings.contactBody")}</p>
                 <p className="text-xs text-muted-foreground">{t("settings.contactSubtext")}</p>
               </div>
-              <a
-                href="mailto:support@islamicapp.com"
-                className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-muted transition-colors border border-border"
-              >
+              <a href="mailto:support@islamicapp.com" className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-muted transition-colors border border-border">
                 <Mail className="w-5 h-5 text-primary" />
                 <span className="text-sm text-foreground">support@islamicapp.com</span>
                 <ExternalLink className="w-4 h-4 text-muted-foreground ml-auto" />
@@ -215,7 +171,6 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
             </div>
           </div>
         );
-
       case "donate":
         return (
           <div>
@@ -225,16 +180,11 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
                 <Heart className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-lg font-semibold text-foreground">{t("settings.supportApp")}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {t("settings.donateBody")}
-              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t("settings.donateBody")}</p>
               <p className="font-arabic text-primary text-base">جزاكم الله خيراً</p>
               <div className="space-y-2 pt-2">
                 {["$5", "$10", "$25", "$50"].map((amount) => (
-                  <button
-                    key={amount}
-                    className="w-full p-3 rounded-xl border border-border hover:bg-primary hover:text-primary-foreground transition-all text-sm font-medium text-foreground"
-                  >
+                  <button key={amount} className="w-full p-3 rounded-xl border border-border hover:bg-primary hover:text-primary-foreground transition-all text-sm font-medium text-foreground">
                     {t("settings.donateAmount")} {amount}
                   </button>
                 ))}
@@ -242,7 +192,6 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
             </div>
           </div>
         );
-
       default:
         return null;
     }
@@ -251,9 +200,7 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent side="right" className="w-80 bg-card border-border p-0 overflow-y-auto">
-        {subPage ? (
-          renderSubPage()
-        ) : (
+        {subPage ? renderSubPage() : (
           <>
             <SheetHeader className="islamic-gradient p-6 pb-8">
               <SheetTitle className="text-primary-foreground text-xl font-bold">{t("settings.title")}</SheetTitle>
@@ -261,11 +208,9 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
             </SheetHeader>
             <div className="p-4 space-y-1">
               {menuItems.map((item) => (
-                <button
-                  key={item.label}
-                  onClick={() => item.page && setSubPage(item.page)}
-                  className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-muted transition-colors text-left"
-                >
+                <button key={item.label}
+                  onClick={() => 'action' in item && item.action ? item.action() : item.page && setSubPage(item.page)}
+                  className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-muted transition-colors text-left">
                   <div className="w-10 h-10 rounded-xl bg-emerald-light flex items-center justify-center shrink-0">
                     <item.icon className="w-5 h-5 text-primary" />
                   </div>
@@ -273,7 +218,7 @@ const SettingsDrawer = ({ open, onOpenChange }: SettingsDrawerProps) => {
                     <p className="text-sm font-medium text-foreground">{item.label}</p>
                     <p className="text-xs text-muted-foreground truncate">{item.desc}</p>
                   </div>
-                  {item.page && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                  {(item.page || ('action' in item)) && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
                 </button>
               ))}
             </div>

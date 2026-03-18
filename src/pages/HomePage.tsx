@@ -6,8 +6,6 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import { Progress } from "@/components/ui/progress";
-import Achievements from "@/components/Achievements";
-import DailyReminder from "@/components/DailyReminder";
 
 // --- Helpers ---
 function getLoginStreak(): number {
@@ -131,7 +129,6 @@ const HomePage = () => {
         setQuizAnswer(null);
       } else {
         setQuizDone(true);
-        // Track quiz completion for achievements
         const done = JSON.parse(localStorage.getItem("quiz-completed") || "[]");
         if (!done.includes(quizCat.id)) {
           done.push(quizCat.id);
@@ -287,12 +284,6 @@ const HomePage = () => {
             </div>
           )}
         </div>
-
-        {/* Achievements */}
-        <Achievements />
-
-        {/* Daily Reminders */}
-        <DailyReminder />
 
         {/* Tafsir download shortcut */}
         <button onClick={() => navigate("/quran")}

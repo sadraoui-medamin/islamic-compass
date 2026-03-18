@@ -5,6 +5,7 @@ import PageHeader from "@/components/PageHeader";
 import { fetchPrayerTimes, CALCULATION_METHODS } from "@/lib/prayerApi";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/lib/languageContext";
+import DailyReminder from "@/components/DailyReminder";
 
 const PrayerTimesPage = () => {
   const { t } = useLanguage();
@@ -147,6 +148,11 @@ const PrayerTimesPage = () => {
             ))}
           </div>
         )}
+
+        {/* Daily Reminders Section */}
+        <div className="mt-6">
+          <DailyReminder />
+        </div>
       </div>
     </div>
   );

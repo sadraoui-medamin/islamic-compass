@@ -12,6 +12,7 @@ import DuaPage from "./pages/DuaPage";
 import TasbihPage from "./pages/TasbihPage";
 import QiblaPage from "./pages/QiblaPage";
 import PrayerTimesPage from "./pages/PrayerTimesPage";
+import AchievementsPage from "./pages/AchievementsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/tasbih" element={<TasbihPage />} />
               <Route path="/qibla" element={<QiblaPage />} />
               <Route path="/prayer" element={<PrayerTimesPage />} />
+              <Route path="/achievements" element={<AchievementsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

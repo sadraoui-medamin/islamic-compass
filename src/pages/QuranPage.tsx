@@ -83,7 +83,7 @@ const QuranPage = () => {
   if (displayMode === "mushaf" && !selectedSurah && selectedPage === null && selectedJuz === null && !search && !showBookmarks) {
     return (
       <div className="animate-fade-in">
-        <div className="islamic-gradient text-primary-foreground p-4 pb-3">
+        <div className={`islamic-gradient text-primary-foreground p-4 pb-3 transition-all duration-300 overflow-hidden ${headerVisible ? "max-h-40 opacity-100" : "max-h-0 opacity-0 p-0 pb-0"}`}>
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="text-lg font-bold flex items-center gap-2">

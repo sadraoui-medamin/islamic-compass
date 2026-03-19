@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Sun, Home, HandHeart, Clock, Menu } from "lucide-react";
+import { BookOpen, Sun, Home, HandHeart, Clock, Menu, Compass, CircleDot } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import type { TranslationKey } from "@/lib/translations";
 

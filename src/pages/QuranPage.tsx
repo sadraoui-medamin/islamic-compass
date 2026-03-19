@@ -23,7 +23,23 @@ const QuranPage = () => {
   const [selectedPage, setSelectedPage] = useState<number | null>(null);
   const [selectedJuz, setSelectedJuz] = useState<number | null>(null);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("mushaf");
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const lastRead = getLastRead();
+
+  useEffect(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+    const onScroll = () => {
+      const y = main.scrollTop;
+      if (y < 10) setHeaderVisible(true);
+      else if (y > lastScrollY.current + 8) setHeaderVisible(false);
+      else if (y < lastScrollY.current - 8) setHeaderVisible(true);
+      lastScrollY.current = y;
+    };
+    main.addEventListener("scroll", onScroll, { passive: true });
+    return () => main.removeEventListener("scroll", onScroll);
+  }, []);
 
   const { data: surahs = [], isLoading } = useQuery({
     queryKey: ["surahs"],

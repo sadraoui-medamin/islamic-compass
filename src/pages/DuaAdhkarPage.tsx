@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { HandHeart, Sun } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import DuaPage from "./DuaPage";
-import AdhkarPage from "./AdhkarPage";
 import { useLanguage } from "@/lib/languageContext";
 
 const DuaAdhkarPage = () => {

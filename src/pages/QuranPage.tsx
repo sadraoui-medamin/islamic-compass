@@ -33,8 +33,8 @@ const QuranPage = () => {
     const onScroll = () => {
       const y = main.scrollTop;
       if (y < 10) setHeaderVisible(true);
-      else if (y > lastScrollY.current + 8) setHeaderVisible(false);
-      else if (y < lastScrollY.current - 8) setHeaderVisible(true);
+      else if (y > lastScrollY.current + 8) setHeaderVisible(false); // scrolling down → hide header
+      else if (y < lastScrollY.current - 8) setHeaderVisible(true); // scrolling up → show header
       lastScrollY.current = y;
     };
     main.addEventListener("scroll", onScroll, { passive: true });

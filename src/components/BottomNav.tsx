@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Sun, Home, HandHeart, Clock, Menu } from "lucide-react";
+import { BookOpen, Sun, Home, HandHeart, Clock, Menu, Compass, CircleDot } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import type { TranslationKey } from "@/lib/translations";
 
@@ -10,9 +10,11 @@ interface BottomNavProps {
 const leftItems: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }[] = [
   { path: "/quran", icon: BookOpen, labelKey: "nav.quran" },
   { path: "/dua", icon: HandHeart, labelKey: "nav.dua" },
+  { path: "/qibla", icon: Compass, labelKey: "nav.qibla" },
 ];
 
 const rightItems: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }[] = [
+  { path: "/tasbih", icon: CircleDot, labelKey: "nav.tasbih" },
   { path: "/adhkar", icon: Sun, labelKey: "nav.adhkar" },
   { path: "/prayer", icon: Clock, labelKey: "nav.prayer" },
 ];

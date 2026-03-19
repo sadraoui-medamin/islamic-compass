@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Sun, Home, HandHeart, Clock, Menu, Compass, CircleDot } from "lucide-react";
+import { BookOpen, Home, HandHeart, Clock, Compass, CircleDot } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
 
 interface BottomNavProps {
   onSettingsClick: () => void;
@@ -10,12 +11,10 @@ interface BottomNavProps {
 const leftItems: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }[] = [
   { path: "/quran", icon: BookOpen, labelKey: "nav.quran" },
   { path: "/dua", icon: HandHeart, labelKey: "nav.dua" },
-  { path: "/qibla", icon: Compass, labelKey: "nav.qibla" },
 ];
 
 const rightItems: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }[] = [
   { path: "/tasbih", icon: CircleDot, labelKey: "nav.tasbih" },
-  { path: "/adhkar", icon: Sun, labelKey: "nav.adhkar" },
   { path: "/prayer", icon: Clock, labelKey: "nav.prayer" },
 ];
 
@@ -23,6 +22,7 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const visible = useScrollDirection();
 
   const renderItem = (item: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }) => {
     const isActive = location.pathname === item.path;
@@ -30,7 +30,7 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
       <button
         key={item.path}
         onClick={() => navigate(item.path)}
-        className={`flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-200 min-w-[2.8rem] ${
+        className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 min-w-[3.2rem] ${
           isActive
             ? "text-primary scale-105"
             : "text-muted-foreground hover:text-foreground"
@@ -45,10 +45,13 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
   };
 
   const isHomeActive = location.pathname === "/";
+  const isQiblaActive = location.pathname === "/qibla";
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50"
+      className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 transition-transform duration-300 ${
+        visible ? "translate-y-0" : "translate-y-full"
+      }`}
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       <div
@@ -61,8 +64,20 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
         }}
       >
         <div className="flex items-center justify-around py-1 relative">
-          {/* Left items */}
           {leftItems.map(renderItem)}
+
+          {/* Qibla */}
+          <button
+            onClick={() => navigate("/qibla")}
+            className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 min-w-[3.2rem] ${
+              isQiblaActive ? "text-primary scale-105" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <div className={`p-1.5 rounded-xl transition-all ${isQiblaActive ? "islamic-gradient text-primary-foreground shadow-md" : ""}`}>
+              <Compass className="w-[18px] h-[18px]" strokeWidth={isQiblaActive ? 2.2 : 1.8} />
+            </div>
+            <span className="text-[9px] font-medium leading-tight">{t("nav.qibla")}</span>
+          </button>
 
           {/* Center Home button */}
           <button
@@ -88,19 +103,7 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
             </span>
           </button>
 
-          {/* Right items */}
           {rightItems.map(renderItem)}
-
-          {/* Settings */}
-          <button
-            onClick={onSettingsClick}
-            className="flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl text-muted-foreground hover:text-foreground transition-all min-w-[2.8rem]"
-          >
-            <div className="p-1.5">
-              <Menu className="w-[18px] h-[18px]" strokeWidth={1.8} />
-            </div>
-            <span className="text-[9px] font-medium leading-tight">{t("nav.more")}</span>
-          </button>
         </div>
       </div>
     </nav>

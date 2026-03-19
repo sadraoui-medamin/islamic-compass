@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BookOpen, Sun, HandHeart, Clock, Trophy, Brain, Flame,
-  ChevronRight, Download, CircleDot, BookOpenCheck
+  ChevronRight, Download, CircleDot, BookOpenCheck, Compass
 } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import { Progress } from "@/components/ui/progress";

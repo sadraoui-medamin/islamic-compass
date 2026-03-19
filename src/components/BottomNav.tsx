@@ -10,9 +10,11 @@ interface BottomNavProps {
 const leftItems: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }[] = [
   { path: "/quran", icon: BookOpen, labelKey: "nav.quran" },
   { path: "/dua", icon: HandHeart, labelKey: "nav.dua" },
+  { path: "/qibla", icon: Compass, labelKey: "nav.qibla" },
 ];
 
 const rightItems: { path: string; icon: typeof BookOpen; labelKey: TranslationKey }[] = [
+  { path: "/tasbih", icon: CircleDot, labelKey: "nav.tasbih" },
   { path: "/adhkar", icon: Sun, labelKey: "nav.adhkar" },
   { path: "/prayer", icon: Clock, labelKey: "nav.prayer" },
 ];

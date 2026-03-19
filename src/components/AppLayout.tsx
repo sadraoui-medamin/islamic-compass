@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import SettingsDrawer from "./SettingsDrawer";
 
@@ -9,7 +9,7 @@ const AppLayout = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-md mx-auto relative">
       <SettingsDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
-      <main className="flex-1 bottom-nav-safe">
+      <main className="flex-1 bottom-nav-safe overflow-y-auto">
         <Outlet context={{ openDrawer: () => setDrawerOpen(true) }} />
       </main>
       <BottomNav onSettingsClick={() => setDrawerOpen(true)} />

@@ -7,8 +7,7 @@ import { LanguageProvider } from "@/lib/languageContext";
 import AppLayout from "./components/AppLayout";
 import HomePage from "./pages/HomePage";
 import QuranPage from "./pages/QuranPage";
-import AdhkarPage from "./pages/AdhkarPage";
-import DuaPage from "./pages/DuaPage";
+import DuaAdhkarPage from "./pages/DuaAdhkarPage";
 import TasbihPage from "./pages/TasbihPage";
 import QiblaPage from "./pages/QiblaPage";
 import PrayerTimesPage from "./pages/PrayerTimesPage";
@@ -28,8 +27,7 @@ const App = () => (
             <Route element={<AppLayout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/quran" element={<QuranPage />} />
-              <Route path="/adhkar" element={<AdhkarPage />} />
-              <Route path="/dua" element={<DuaPage />} />
+              <Route path="/dua" element={<DuaAdhkarPage />} />
               <Route path="/tasbih" element={<TasbihPage />} />
               <Route path="/qibla" element={<QiblaPage />} />
               <Route path="/prayer" element={<PrayerTimesPage />} />

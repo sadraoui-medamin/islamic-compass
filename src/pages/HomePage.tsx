@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BookOpen, Sun, HandHeart, Clock, Trophy, Brain, Flame,
-  ChevronRight, Download, CircleDot, BookOpenCheck
+  ChevronRight, Download, CircleDot, BookOpenCheck, Compass
 } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import { Progress } from "@/components/ui/progress";
@@ -107,9 +107,9 @@ const HomePage = () => {
 
   const quickActions = [
     { icon: BookOpen, label: lang === "ar" ? "القرآن" : "Quran", path: "/quran" },
-    { icon: Sun, label: lang === "ar" ? "الأذكار" : "Adhkar", path: "/adhkar" },
-    { icon: HandHeart, label: lang === "ar" ? "الدعاء" : "Dua", path: "/dua" },
+    { icon: Sun, label: lang === "ar" ? "الأذكار والدعاء" : "Dua & Adhkar", path: "/dua" },
     { icon: Clock, label: lang === "ar" ? "الصلاة" : "Prayer", path: "/prayer" },
+    { icon: Compass, label: lang === "ar" ? "القبلة" : "Qibla", path: "/qibla" },
   ];
 
   const challenges = [

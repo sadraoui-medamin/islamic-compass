@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { BookOpen, Search, ChevronRight, Bookmark, Clock, Trash2, X, BookText, Layers, FileText, BookOpenCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import PageHeader from "@/components/PageHeader";
@@ -23,7 +23,23 @@ const QuranPage = () => {
   const [selectedPage, setSelectedPage] = useState<number | null>(null);
   const [selectedJuz, setSelectedJuz] = useState<number | null>(null);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("mushaf");
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const lastRead = getLastRead();
+
+  useEffect(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+    const onScroll = () => {
+      const y = main.scrollTop;
+      if (y < 10) setHeaderVisible(true);
+      else if (y > lastScrollY.current + 8) setHeaderVisible(false); // scrolling down → hide header
+      else if (y < lastScrollY.current - 8) setHeaderVisible(true); // scrolling up → show header
+      lastScrollY.current = y;
+    };
+    main.addEventListener("scroll", onScroll, { passive: true });
+    return () => main.removeEventListener("scroll", onScroll);
+  }, []);
 
   const { data: surahs = [], isLoading } = useQuery({
     queryKey: ["surahs"],
@@ -67,7 +83,7 @@ const QuranPage = () => {
   if (displayMode === "mushaf" && !selectedSurah && selectedPage === null && selectedJuz === null && !search && !showBookmarks) {
     return (
       <div className="animate-fade-in">
-        <div className="islamic-gradient text-primary-foreground p-4 pb-3">
+        <div className={`islamic-gradient text-primary-foreground p-4 pb-3 transition-all duration-300 overflow-hidden ${headerVisible ? "max-h-40 opacity-100" : "max-h-0 opacity-0 p-0 pb-0"}`}>
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="text-lg font-bold flex items-center gap-2">

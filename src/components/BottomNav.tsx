@@ -30,16 +30,16 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
       <button
         key={item.path}
         onClick={() => navigate(item.path)}
-        className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 min-w-[3.2rem] ${
+        className={`flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-200 min-w-[2.8rem] ${
           isActive
             ? "text-primary scale-105"
             : "text-muted-foreground hover:text-foreground"
         }`}
       >
         <div className={`p-1.5 rounded-xl transition-all ${isActive ? "islamic-gradient text-primary-foreground shadow-md" : ""}`}>
-          <item.icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
+          <item.icon className="w-[17px] h-[17px]" strokeWidth={isActive ? 2.2 : 1.8} />
         </div>
-        <span className="text-[9px] font-medium leading-tight">{t(item.labelKey)}</span>
+        <span className="text-[8px] font-medium leading-tight">{t(item.labelKey)}</span>
       </button>
     );
   };

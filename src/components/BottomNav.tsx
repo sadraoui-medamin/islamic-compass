@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Home, HandHeart, Clock, Compass, CircleDot } from "lucide-react";
+import { BookOpen, Home, HandHeart, Clock, Compass, CircleDot, Settings } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import type { TranslationKey } from "@/lib/translations";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";

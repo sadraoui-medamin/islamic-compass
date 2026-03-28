@@ -69,14 +69,14 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
           {/* Qibla */}
           <button
             onClick={() => navigate("/qibla")}
-            className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 min-w-[3.2rem] ${
+            className={`flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-200 min-w-[2.8rem] ${
               isQiblaActive ? "text-primary scale-105" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <div className={`p-1.5 rounded-xl transition-all ${isQiblaActive ? "islamic-gradient text-primary-foreground shadow-md" : ""}`}>
-              <Compass className="w-[18px] h-[18px]" strokeWidth={isQiblaActive ? 2.2 : 1.8} />
+              <Compass className="w-[17px] h-[17px]" strokeWidth={isQiblaActive ? 2.2 : 1.8} />
             </div>
-            <span className="text-[9px] font-medium leading-tight">{t("nav.qibla")}</span>
+            <span className="text-[8px] font-medium leading-tight">{t("nav.qibla")}</span>
           </button>
 
           {/* Center Home button */}
@@ -85,7 +85,7 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
             className="flex flex-col items-center gap-0.5 -mt-6"
           >
             <div
-              className={`w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
+              className={`w-[48px] h-[48px] rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
                 isHomeActive
                   ? "islamic-gradient scale-110"
                   : "islamic-gradient opacity-85 hover:opacity-100 hover:scale-105"
@@ -98,12 +98,23 @@ const BottomNav = ({ onSettingsClick }: BottomNavProps) => {
             >
               <Home className="w-5 h-5 text-primary-foreground" strokeWidth={2.2} />
             </div>
-            <span className={`text-[9px] font-semibold mt-0.5 ${isHomeActive ? "text-primary" : "text-muted-foreground"}`}>
+            <span className={`text-[8px] font-semibold mt-0.5 ${isHomeActive ? "text-primary" : "text-muted-foreground"}`}>
               {t("nav.home")}
             </span>
           </button>
 
           {rightItems.map(renderItem)}
+
+          {/* Settings */}
+          <button
+            onClick={onSettingsClick}
+            className="flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-200 min-w-[2.8rem] text-muted-foreground hover:text-foreground"
+          >
+            <div className="p-1.5 rounded-xl transition-all">
+              <Settings className="w-[17px] h-[17px]" strokeWidth={1.8} />
+            </div>
+            <span className="text-[8px] font-medium leading-tight">{t("settings.title")}</span>
+          </button>
         </div>
       </div>
     </nav>

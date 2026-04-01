@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { BookOpen, Search, ChevronRight, Bookmark, Clock, Trash2, X, BookText, Layers, FileText, BookOpenCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useOutletContext } from "react-router-dom";
 import PageHeader from "@/components/PageHeader";
 import SurahReader from "@/components/SurahReader";
 import { fetchAllSurahs, searchQuran, searchQuranArabic, JUZ_DATA, type Surah } from "@/lib/quranApi";

@@ -15,6 +15,7 @@ type DisplayMode = "mushaf" | "list";
 
 const QuranPage = () => {
   const { t } = useLanguage();
+  const { setIsFullscreenReading } = useOutletContext<{ setIsFullscreenReading: (v: boolean) => void }>();
   const [search, setSearch] = useState("");
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [startAyah, setStartAyah] = useState<number | undefined>();
@@ -27,6 +28,14 @@ const QuranPage = () => {
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const lastRead = getLastRead();
+
+  const isReading = !!(selectedSurah || selectedPage !== null || selectedJuz !== null ||
+    (displayMode === "mushaf" && !search && !showBookmarks));
+
+  useEffect(() => {
+    setIsFullscreenReading(isReading);
+    return () => setIsFullscreenReading(false);
+  }, [isReading, setIsFullscreenReading]);
 
   useEffect(() => {
     const main = document.querySelector("main");

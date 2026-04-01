@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { BookOpen, Search, ChevronRight, Bookmark, Clock, Trash2, X, BookText, Layers, FileText, BookOpenCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useOutletContext } from "react-router-dom";
 import PageHeader from "@/components/PageHeader";
 import SurahReader from "@/components/SurahReader";
 import { fetchAllSurahs, searchQuran, searchQuranArabic, JUZ_DATA, type Surah } from "@/lib/quranApi";
@@ -14,6 +15,7 @@ type DisplayMode = "mushaf" | "list";
 
 const QuranPage = () => {
   const { t } = useLanguage();
+  const { setIsFullscreenReading } = useOutletContext<{ setIsFullscreenReading: (v: boolean) => void }>();
   const [search, setSearch] = useState("");
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [startAyah, setStartAyah] = useState<number | undefined>();
@@ -26,6 +28,14 @@ const QuranPage = () => {
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const lastRead = getLastRead();
+
+  const isReading = !!(selectedSurah || selectedPage !== null || selectedJuz !== null ||
+    (displayMode === "mushaf" && !search && !showBookmarks));
+
+  useEffect(() => {
+    setIsFullscreenReading(isReading);
+    return () => setIsFullscreenReading(false);
+  }, [isReading, setIsFullscreenReading]);
 
   useEffect(() => {
     const main = document.querySelector("main");

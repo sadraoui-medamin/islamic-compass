@@ -143,17 +143,18 @@ const QuranPage = () => {
         surahName={selectedSurah.englishName}
         surahNameAr={selectedSurah.name}
         startAyah={startAyah}
-        onBack={handleBack}
+        onBack={() => { handleExitFullscreen(); handleBack(); }}
+        onFullscreenChange={(v) => v ? handleEnterFullscreen() : handleExitFullscreen()}
       />
     );
   }
 
   if (selectedPage !== null) {
-    return <PageReader pageNumber={selectedPage} onBack={handleBack} />;
+    return <PageReader pageNumber={selectedPage} onBack={() => { handleExitFullscreen(); handleBack(); }} onFullscreenChange={(v) => v ? handleEnterFullscreen() : handleExitFullscreen()} />;
   }
 
   if (selectedJuz !== null) {
-    return <PageReader juzNumber={selectedJuz} onBack={handleBack} />;
+    return <PageReader juzNumber={selectedJuz} onBack={() => { handleExitFullscreen(); handleBack(); }} onFullscreenChange={(v) => v ? handleEnterFullscreen() : handleExitFullscreen()} />;
   }
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [

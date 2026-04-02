@@ -345,7 +345,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
             </div>
           )}
           <button
-            onClick={(e) => { e.stopPropagation(); setImmersive(false); setShowOverlay(false); }}
+            onClick={(e) => { e.stopPropagation(); setImmersive(false); setShowOverlay(false); onFullscreenChange?.(false); }}
             className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition text-white"
           >
             <Minimize2 className="w-4 h-4" />

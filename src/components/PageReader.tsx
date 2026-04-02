@@ -23,9 +23,10 @@ interface PageReaderProps {
   pageNumber?: number;
   juzNumber?: number;
   onBack: () => void;
+  onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
-const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
+const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageReaderProps) => {
   const [currentPage, setCurrentPage] = useState(pageNumber || 1);
   const [readingVersion, setReadingVersion] = useState(READING_VERSIONS[0].id);
 

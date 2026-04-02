@@ -234,7 +234,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
               <p className="text-sm opacity-80 font-arabic">{subtitle}</p>
             </div>
             <button
-              onClick={() => setImmersive(true)}
+              onClick={() => { setImmersive(true); onFullscreenChange?.(true); }}
               className="p-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition"
               title="Fullscreen reading"
             >

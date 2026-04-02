@@ -23,9 +23,10 @@ interface PageReaderProps {
   pageNumber?: number;
   juzNumber?: number;
   onBack: () => void;
+  onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
-const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
+const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageReaderProps) => {
   const [currentPage, setCurrentPage] = useState(pageNumber || 1);
   const [readingVersion, setReadingVersion] = useState(READING_VERSIONS[0].id);
 
@@ -233,7 +234,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
               <p className="text-sm opacity-80 font-arabic">{subtitle}</p>
             </div>
             <button
-              onClick={() => setImmersive(true)}
+              onClick={() => { setImmersive(true); onFullscreenChange?.(true); }}
               className="p-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition"
               title="Fullscreen reading"
             >
@@ -299,7 +300,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
       {immersive && showOverlay && (
         <div className="fixed top-0 left-0 right-0 z-50 flex items-center gap-2 p-3 bg-black/70 backdrop-blur-sm animate-fade-in">
           <button
-            onClick={(e) => { e.stopPropagation(); if (audioRef.current) audioRef.current.pause(); setImmersive(false); setShowOverlay(false); }}
+            onClick={(e) => { e.stopPropagation(); if (audioRef.current) audioRef.current.pause(); setImmersive(false); setShowOverlay(false); onFullscreenChange?.(false); }}
             className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition text-white"
           >
             <ArrowRight className="w-5 h-5 rotate-180" />
@@ -344,7 +345,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack }: PageReaderProps) => {
             </div>
           )}
           <button
-            onClick={(e) => { e.stopPropagation(); setImmersive(false); setShowOverlay(false); }}
+            onClick={(e) => { e.stopPropagation(); setImmersive(false); setShowOverlay(false); onFullscreenChange?.(false); }}
             className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition text-white"
           >
             <Minimize2 className="w-4 h-4" />

@@ -16,12 +16,13 @@ interface SurahReaderProps {
   surahNameAr: string;
   startAyah?: number;
   onBack: () => void;
+  onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
 type LoopMode = "none" | "ayah" | "surah";
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack }: SurahReaderProps) => {
+const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack, onFullscreenChange }: SurahReaderProps) => {
   const [reciter, setReciter] = useState(RECITERS[0].id);
   const [readingVersion, setReadingVersion] = useState(READING_VERSIONS[0].id);
   const [fontSize, setFontSize] = useState(24);

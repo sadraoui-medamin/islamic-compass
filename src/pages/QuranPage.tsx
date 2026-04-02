@@ -29,13 +29,8 @@ const QuranPage = () => {
   const lastScrollY = useRef(0);
   const lastRead = getLastRead();
 
-  const isReading = !!(selectedSurah || selectedPage !== null || selectedJuz !== null ||
-    (displayMode === "mushaf" && !search && !showBookmarks));
-
-  useEffect(() => {
-    setIsFullscreenReading(isReading);
-    return () => setIsFullscreenReading(false);
-  }, [isReading, setIsFullscreenReading]);
+  const handleEnterFullscreen = () => setIsFullscreenReading(true);
+  const handleExitFullscreen = () => setIsFullscreenReading(false);
 
   useEffect(() => {
     const main = document.querySelector("main");
@@ -136,7 +131,7 @@ const QuranPage = () => {
           )}
         </div>
 
-        <PageReader pageNumber={1} onBack={() => setDisplayMode("list")} />
+        <PageReader pageNumber={1} onBack={() => setDisplayMode("list")} onFullscreenChange={(v) => v ? handleEnterFullscreen() : handleExitFullscreen()} />
       </div>
     );
   }
@@ -148,17 +143,18 @@ const QuranPage = () => {
         surahName={selectedSurah.englishName}
         surahNameAr={selectedSurah.name}
         startAyah={startAyah}
-        onBack={handleBack}
+        onBack={() => { handleExitFullscreen(); handleBack(); }}
+        onFullscreenChange={(v) => v ? handleEnterFullscreen() : handleExitFullscreen()}
       />
     );
   }
 
   if (selectedPage !== null) {
-    return <PageReader pageNumber={selectedPage} onBack={handleBack} />;
+    return <PageReader pageNumber={selectedPage} onBack={() => { handleExitFullscreen(); handleBack(); }} onFullscreenChange={(v) => v ? handleEnterFullscreen() : handleExitFullscreen()} />;
   }
 
   if (selectedJuz !== null) {
-    return <PageReader juzNumber={selectedJuz} onBack={handleBack} />;
+    return <PageReader juzNumber={selectedJuz} onBack={() => { handleExitFullscreen(); handleBack(); }} onFullscreenChange={(v) => v ? handleEnterFullscreen() : handleExitFullscreen()} />;
   }
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [

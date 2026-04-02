@@ -29,13 +29,8 @@ const QuranPage = () => {
   const lastScrollY = useRef(0);
   const lastRead = getLastRead();
 
-  const isReading = !!(selectedSurah || selectedPage !== null || selectedJuz !== null ||
-    (displayMode === "mushaf" && !search && !showBookmarks));
-
-  useEffect(() => {
-    setIsFullscreenReading(isReading);
-    return () => setIsFullscreenReading(false);
-  }, [isReading, setIsFullscreenReading]);
+  const handleEnterFullscreen = () => setIsFullscreenReading(true);
+  const handleExitFullscreen = () => setIsFullscreenReading(false);
 
   useEffect(() => {
     const main = document.querySelector("main");

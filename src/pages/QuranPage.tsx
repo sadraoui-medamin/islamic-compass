@@ -131,7 +131,7 @@ const QuranPage = () => {
           )}
         </div>
 
-        <PageReader pageNumber={1} onBack={() => setDisplayMode("list")} />
+        <PageReader pageNumber={1} onBack={() => setDisplayMode("list")} onFullscreenChange={(v) => v ? handleEnterFullscreen() : handleExitFullscreen()} />
       </div>
     );
   }

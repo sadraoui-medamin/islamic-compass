@@ -300,7 +300,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
       {immersive && showOverlay && (
         <div className="fixed top-0 left-0 right-0 z-50 flex items-center gap-2 p-3 bg-black/70 backdrop-blur-sm animate-fade-in">
           <button
-            onClick={(e) => { e.stopPropagation(); if (audioRef.current) audioRef.current.pause(); setImmersive(false); setShowOverlay(false); }}
+            onClick={(e) => { e.stopPropagation(); if (audioRef.current) audioRef.current.pause(); setImmersive(false); setShowOverlay(false); onFullscreenChange?.(false); }}
             className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition text-white"
           >
             <ArrowRight className="w-5 h-5 rotate-180" />

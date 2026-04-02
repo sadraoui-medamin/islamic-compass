@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Sun, Moon, Star, ChevronLeft, RotateCcw } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { adhkarCategories, type AdhkarCategory, type Dhikr } from "@/lib/adhkarData";
@@ -11,6 +11,19 @@ const AdhkarPage = () => {
   const isArabic = lang === "ar";
   const [selectedCategory, setSelectedCategory] = useState<AdhkarCategory | null>(null);
   const [counters, setCounters] = useState<Record<number, number>>({});
+  const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  const scrollToItem = useCallback((id: number) => {
+    setTimeout(() => {
+      const el = itemRefs.current[id];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Brief highlight
+        el.classList.add("ring-2", "ring-primary/40");
+        setTimeout(() => el.classList.remove("ring-2", "ring-primary/40"), 1000);
+      }
+    }, 300);
+  }, []);
 
   const handleCount = (dhikr: Dhikr) => {
     const current = counters[dhikr.id] || 0;
@@ -22,6 +35,19 @@ const AdhkarPage = () => {
         const prev = parseInt(localStorage.getItem("adhkar-done") || "0", 10);
         localStorage.setItem("adhkar-done", String(prev + 1));
         localStorage.setItem("last-activity", selectedCategory?.title || "Adhkar");
+
+        // Auto-advance to next incomplete item
+        if (selectedCategory) {
+          const currentIdx = selectedCategory.adhkar.findIndex((d) => d.id === dhikr.id);
+          for (let i = currentIdx + 1; i < selectedCategory.adhkar.length; i++) {
+            const nextDhikr = selectedCategory.adhkar[i];
+            const nextCount = counters[nextDhikr.id] || 0;
+            if (nextCount < nextDhikr.repeat) {
+              scrollToItem(nextDhikr.id);
+              break;
+            }
+          }
+        }
       }
     }
   };
@@ -72,7 +98,8 @@ const AdhkarPage = () => {
             return (
               <div
                 key={dhikr.id}
-                className={`rounded-2xl transition-all animate-slide-up ${done ? "bg-primary/5 border border-primary/20" : "bg-card"}`}
+                ref={(el) => { itemRefs.current[dhikr.id] = el; }}
+                className={`rounded-2xl transition-all duration-300 animate-slide-up ${done ? "bg-primary/5 border border-primary/20" : "bg-card"}`}
                 style={{ animationDelay: `${i * 40}ms` }}
               >
                 <button

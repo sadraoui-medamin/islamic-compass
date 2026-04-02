@@ -50,79 +50,129 @@ const QiblaPage = () => {
 
       <div className="px-4 py-8 flex flex-col items-center">
         {error ? (
-          <div className="text-center p-6 rounded-2xl bg-card shadow-md">
-            <Compass className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <div className="text-center p-8 rounded-3xl bg-card shadow-lg border border-border">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <Compass className="w-8 h-8 text-muted-foreground" />
+            </div>
             <p className="text-sm text-muted-foreground">{error}</p>
           </div>
         ) : (
           <>
-            {/* Outer glow when aligned */}
-            <div className={`relative w-72 h-72 flex items-center justify-center transition-all duration-700 ${
-              isAligned ? "drop-shadow-[0_0_40px_hsl(var(--primary)/0.4)]" : ""
+            {/* Compass container */}
+            <div className={`relative w-[280px] h-[280px] flex items-center justify-center transition-all duration-700 ${
+              isAligned ? "drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]" : ""
             }`}>
-              {/* Decorative outer ring */}
-              <div className="absolute inset-0 rounded-full border-2 border-dashed border-primary/20 animate-[spin_60s_linear_infinite]" />
+              {/* Outer decorative ring */}
+              <div className="absolute inset-0 rounded-full">
+                <svg viewBox="0 0 280 280" className="w-full h-full animate-[spin_120s_linear_infinite]">
+                  {Array.from({ length: 72 }).map((_, i) => {
+                    const angle = i * 5;
+                    const r = 138;
+                    const cx = 140 + r * Math.cos((angle - 90) * Math.PI / 180);
+                    const cy = 140 + r * Math.sin((angle - 90) * Math.PI / 180);
+                    const isMajor = i % 18 === 0;
+                    const isMid = i % 6 === 0;
+                    return (
+                      <circle
+                        key={i}
+                        cx={cx} cy={cy}
+                        r={isMajor ? 2 : isMid ? 1.2 : 0.6}
+                        fill={isMajor ? "hsl(var(--primary))" : "hsl(var(--border))"}
+                        opacity={isMajor ? 0.8 : 0.4}
+                      />
+                    );
+                  })}
+                </svg>
+              </div>
 
-              {/* Compass */}
+              {/* Main compass body */}
               <div
-                className="w-64 h-64 rounded-full bg-card shadow-2xl border-2 border-border flex items-center justify-center transition-transform duration-300 ease-out relative"
+                className="w-[256px] h-[256px] rounded-full bg-card shadow-2xl border border-border/50 flex items-center justify-center transition-transform duration-300 ease-out relative overflow-hidden"
                 style={{ transform: `rotate(${rotation}deg)` }}
               >
-                {/* Tick marks */}
-                {Array.from({ length: 36 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute top-1 left-1/2 -translate-x-1/2 origin-[50%_126px]"
-                    style={{ transform: `rotate(${i * 10}deg)` }}
-                  >
-                    <div className={`w-0.5 rounded-full ${
-                      i % 9 === 0 ? "h-3 bg-primary" : "h-1.5 bg-border"
-                    }`} />
-                  </div>
-                ))}
+                {/* Subtle radial gradient background */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-b from-primary/[0.03] to-transparent" />
 
-                {/* Kaaba indicator at top */}
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex flex-col items-center z-10">
-                  <div className={`w-5 h-5 rounded-sm rotate-45 transition-colors duration-500 ${
-                    isAligned ? "bg-primary shadow-lg shadow-primary/40" : "bg-foreground"
-                  }`} />
-                  <span className="text-[9px] font-bold text-foreground mt-1 -rotate-45">{t("qibla.kaaba")}</span>
+                {/* Degree tick marks */}
+                {Array.from({ length: 72 }).map((_, i) => {
+                  const isMajor = i % 18 === 0;
+                  const isMid = i % 6 === 0;
+                  return (
+                    <div
+                      key={i}
+                      className="absolute top-0 left-1/2 -translate-x-1/2 origin-[50%_128px]"
+                      style={{ transform: `rotate(${i * 5}deg)` }}
+                    >
+                      <div className={`w-[1px] rounded-full ${
+                        isMajor ? "h-4 bg-primary/70 w-[2px]" : isMid ? "h-2.5 bg-muted-foreground/30" : "h-1.5 bg-border/60"
+                      }`} />
+                    </div>
+                  );
+                })}
+
+                {/* Kaaba indicator */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
+                  <div className={`relative transition-all duration-500`}>
+                    {/* Glow behind kaaba */}
+                    {isAligned && (
+                      <div className="absolute -inset-2 rounded-lg bg-primary/20 blur-md animate-pulse" />
+                    )}
+                    <div className={`w-6 h-6 rounded-[4px] rotate-45 transition-all duration-500 ${
+                      isAligned ? "bg-primary shadow-lg shadow-primary/50 scale-110" : "bg-foreground/80"
+                    }`}>
+                      <div className="absolute inset-[2px] rounded-[2px] border border-primary-foreground/20" />
+                    </div>
+                  </div>
+                  <span className="text-[8px] font-bold text-foreground/70 mt-1.5 tracking-wider uppercase">
+                    {t("qibla.kaaba")}
+                  </span>
                 </div>
 
                 {/* Cardinal directions */}
-                <span className="absolute top-9 left-1/2 -translate-x-1/2 text-xs font-bold text-primary">N</span>
-                <span className="absolute bottom-9 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">S</span>
-                <span className="absolute left-9 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">W</span>
-                <span className="absolute right-9 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">E</span>
+                <span className="absolute top-11 left-1/2 -translate-x-1/2 text-[11px] font-bold text-primary tracking-widest">N</span>
+                <span className="absolute bottom-11 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-muted-foreground/60">S</span>
+                <span className="absolute left-11 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-muted-foreground/60">W</span>
+                <span className="absolute right-11 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-muted-foreground/60">E</span>
 
-                {/* Inner circles */}
-                <div className="w-36 h-36 rounded-full border border-border/60 flex items-center justify-center">
-                  <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 ${
-                    isAligned ? "islamic-gradient scale-110" : "islamic-gradient"
-                  }`}>
-                    <Navigation className={`w-8 h-8 text-primary-foreground transition-transform duration-500 ${
-                      isAligned ? "scale-110" : ""
-                    }`} />
+                {/* Inner rings */}
+                <div className="w-[140px] h-[140px] rounded-full border border-border/30 flex items-center justify-center">
+                  <div className="w-[100px] h-[100px] rounded-full border border-border/20 flex items-center justify-center">
+                    {/* Center orb */}
+                    <div className={`w-[72px] h-[72px] rounded-full flex items-center justify-center transition-all duration-500 ${
+                      isAligned
+                        ? "islamic-gradient shadow-xl shadow-primary/30 scale-110"
+                        : "islamic-gradient shadow-lg"
+                    }`}>
+                      <div className="relative">
+                        <Navigation className={`w-7 h-7 text-primary-foreground transition-all duration-500 ${
+                          isAligned ? "scale-110" : ""
+                        }`} />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Status */}
-            <div className="mt-8 text-center">
+            {/* Status section */}
+            <div className="mt-8 text-center space-y-3">
               {isAligned && (
-                <div className="mb-3 px-4 py-1.5 rounded-full bg-primary/15 border border-primary/25 inline-flex items-center gap-2 animate-fade-in">
+                <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 animate-fade-in">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <span className="text-xs font-semibold text-primary">
+                  <span className="text-xs font-bold text-primary tracking-wide">
                     {lang === "ar" ? "أنت تواجه القبلة ✓" : "Facing Qibla ✓"}
                   </span>
                 </div>
               )}
-              <p className="font-arabic text-2xl text-primary">القبلة</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {hasLocation ? `${Math.round(qiblaAngle)}${t("qibla.fromNorth")}` : t("qibla.gettingLocation")}
-              </p>
-              <p className="text-xs text-muted-foreground mt-3 max-w-[250px]">
+
+              <div>
+                <p className="font-arabic text-3xl text-primary font-bold">القبلة</p>
+                <p className="text-sm text-muted-foreground mt-2 tabular-nums">
+                  {hasLocation ? `${Math.round(qiblaAngle)}${t("qibla.fromNorth")}` : t("qibla.gettingLocation")}
+                </p>
+              </div>
+
+              <p className="text-xs text-muted-foreground/70 max-w-[220px] mx-auto leading-relaxed">
                 {t("qibla.pointPhone")}
               </p>
             </div>

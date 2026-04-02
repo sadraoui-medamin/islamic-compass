@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { CircleDot, Plus, Trash2, ChevronLeft, ChevronRight, Minus, ArrowLeft } from "lucide-react";
+import { CircleDot, Plus, Trash2, ChevronLeft, ChevronRight, Minus, ArrowLeft, GripVertical } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { useLanguage } from "@/lib/languageContext";
 
@@ -52,6 +52,13 @@ const TasbihPage = () => {
   const [encourageMsg, setEncourageMsg] = useState<string | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
+  // Drag reorder state
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const dragItemRef = useRef<number | null>(null);
+  const dragTouchStartY = useRef<number>(0);
+  const listRef = useRef<HTMLDivElement>(null);
+
   const active = items[activeIdx];
   const progress = active ? Math.min((count / active.target) * 100, 100) : 0;
 
@@ -68,12 +75,9 @@ const TasbihPage = () => {
       const prev = parseInt(localStorage.getItem("tasbih-total") || "0", 10);
       localStorage.setItem("tasbih-total", String(prev + 1));
       localStorage.setItem("last-activity", active?.english || "Tasbih");
-      
-      // Show encouragement at milestones
       if (next === Math.floor(active.target / 2) || next === active.target) {
         showEncouragement();
       }
-      
       if (active && next >= active.target && activeIdx < items.length - 1) {
         setTimeout(() => {
           setSwipeAnim("left");
@@ -142,36 +146,104 @@ const TasbihPage = () => {
     setView("counter");
   };
 
+  // Drag reorder handlers
+  const handleDragStart = (idx: number) => {
+    setDragIdx(idx);
+    dragItemRef.current = idx;
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    setDragOverIdx(idx);
+  };
+
+  const handleDragEnd = () => {
+    if (dragIdx !== null && dragOverIdx !== null && dragIdx !== dragOverIdx) {
+      setItems((prev) => {
+        const newItems = [...prev];
+        const [removed] = newItems.splice(dragIdx, 1);
+        newItems.splice(dragOverIdx, 0, removed);
+        return newItems;
+      });
+    }
+    setDragIdx(null);
+    setDragOverIdx(null);
+  };
+
+  // Touch-based drag reorder
+  const handleGripTouchStart = (e: React.TouchEvent, idx: number) => {
+    e.stopPropagation();
+    setDragIdx(idx);
+    dragItemRef.current = idx;
+    dragTouchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleGripTouchMove = (e: React.TouchEvent) => {
+    if (dragIdx === null || !listRef.current) return;
+    const touchY = e.touches[0].clientY;
+    const children = listRef.current.children;
+    for (let i = 0; i < children.length; i++) {
+      const rect = children[i].getBoundingClientRect();
+      if (touchY >= rect.top && touchY <= rect.bottom) {
+        setDragOverIdx(i);
+        break;
+      }
+    }
+  };
+
+  const handleGripTouchEnd = () => {
+    handleDragEnd();
+  };
+
   // LIST VIEW
   if (view === "list") {
     return (
       <div className="animate-fade-in">
         <PageHeader title={t("tasbih.title")} subtitle={t("tasbih.subtitle")} icon={<CircleDot className="w-6 h-6" />} />
         <div className="px-4 py-4">
-          <div className="space-y-2">
+          <div className="space-y-2" ref={listRef} onTouchMove={handleGripTouchMove}>
             {items.map((item, idx) => (
-              <button
+              <div
                 key={item.id}
-                onClick={() => enterCounter(idx)}
-                className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card hover:bg-muted transition-all duration-200 text-left group active:scale-[0.98]"
+                draggable
+                onDragStart={() => handleDragStart(idx)}
+                onDragOver={(e) => handleDragOver(e, idx)}
+                onDragEnd={handleDragEnd}
+                className={`w-full flex items-center gap-2 rounded-2xl bg-card transition-all duration-200 ${
+                  dragIdx === idx ? "opacity-50 scale-95" : ""
+                } ${dragOverIdx === idx && dragIdx !== idx ? "border-2 border-primary/40" : "border-2 border-transparent"}`}
               >
-                <div className="w-10 h-10 rounded-full islamic-gradient flex items-center justify-center shrink-0 shadow-md">
-                  <span className="text-primary-foreground text-sm font-bold">{idx + 1}</span>
+                {/* Drag handle */}
+                <div
+                  className="pl-2 py-4 cursor-grab active:cursor-grabbing touch-none"
+                  onTouchStart={(e) => handleGripTouchStart(e, idx)}
+                  onTouchEnd={handleGripTouchEnd}
+                >
+                  <GripVertical className="w-4 h-4 text-muted-foreground/50" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-arabic text-lg text-foreground">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.english} · {item.target}×</p>
-                </div>
-                {!defaultItems.find((d) => d.id === item.id) && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}
-                    className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-              </button>
+
+                <button
+                  onClick={() => enterCounter(idx)}
+                  className="flex-1 flex items-center gap-3 p-4 pl-1 text-left group active:scale-[0.98] transition-transform"
+                >
+                  <div className="w-10 h-10 rounded-full islamic-gradient flex items-center justify-center shrink-0 shadow-md">
+                    <span className="text-primary-foreground text-sm font-bold">{idx + 1}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-arabic text-lg text-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">{item.english} · {item.target}×</p>
+                  </div>
+                  {!defaultItems.find((d) => d.id === item.id) && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                </button>
+              </div>
             ))}
           </div>
 
@@ -207,7 +279,6 @@ const TasbihPage = () => {
 
   return (
     <div className="animate-fade-in min-h-screen" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      {/* Header */}
       <div className="islamic-gradient text-primary-foreground p-4">
         <div className="flex items-center gap-3">
           <button onClick={() => setView("list")} className="p-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition active:scale-95">
@@ -221,14 +292,12 @@ const TasbihPage = () => {
         </div>
       </div>
 
-      {/* Encouragement message */}
       <div className="h-8 flex items-center justify-center">
         {encourageMsg && (
           <p className="text-sm font-medium text-primary animate-fade-in">{encourageMsg}</p>
         )}
       </div>
 
-      {/* Counter */}
       <div className={`flex flex-col items-center mt-4 px-4 transition-all duration-300 ease-out ${
         swipeAnim === "left" ? "-translate-x-10 opacity-0" :
         swipeAnim === "right" ? "translate-x-10 opacity-0" : "translate-x-0 opacity-100"
@@ -239,12 +308,11 @@ const TasbihPage = () => {
             isComplete ? "shadow-primary/30 shadow-2xl" : "hover:shadow-2xl active:scale-95"
           }`}
         >
-          {/* Progress ring */}
           <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 224 224">
             <circle cx="112" cy="112" r="104" fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
             <circle
               cx="112" cy="112" r="104" fill="none"
-              stroke={isComplete ? "hsl(var(--primary))" : "hsl(var(--primary))"}
+              stroke="hsl(var(--primary))"
               strokeWidth="6" strokeLinecap="round"
               strokeDasharray={`${2 * Math.PI * 104}`}
               strokeDashoffset={`${2 * Math.PI * 104 * (1 - progress / 100)}`}
@@ -271,7 +339,6 @@ const TasbihPage = () => {
 
         <p className="text-xs text-muted-foreground mt-4">{t("tasbih.tapToCount")}</p>
 
-        {/* Action buttons - no reset */}
         <div className="flex items-center gap-3 mt-6">
           <button onClick={goPrev} disabled={activeIdx <= 0}
             className="p-3 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all active:scale-90 disabled:opacity-30">
@@ -287,7 +354,6 @@ const TasbihPage = () => {
           </button>
         </div>
 
-        {/* Progress dots */}
         <div className="flex gap-1.5 mt-6">
           {items.map((_, i) => (
             <div key={i} className={`h-2 rounded-full transition-all duration-300 ${

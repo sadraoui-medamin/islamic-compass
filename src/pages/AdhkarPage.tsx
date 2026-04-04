@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Sun, Moon, Star, ChevronLeft, RotateCcw } from "lucide-react";
+import { Sun, Moon, Star, ChevronLeft, RotateCcw, CheckCircle2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { adhkarCategories, type AdhkarCategory, type Dhikr } from "@/lib/adhkarData";
 import { useLanguage } from "@/lib/languageContext";
@@ -30,23 +30,32 @@ const AdhkarPage = () => {
     if (current < dhikr.repeat) {
       const newCount = current + 1;
       setCounters((prev) => ({ ...prev, [dhikr.id]: newCount }));
-      // Track completed adhkar
       if (newCount >= dhikr.repeat) {
-        const prev = parseInt(localStorage.getItem("adhkar-done") || "0", 10);
-        localStorage.setItem("adhkar-done", String(prev + 1));
-        localStorage.setItem("last-activity", selectedCategory?.title || "Adhkar");
+        onDhikrComplete(dhikr);
+      }
+    }
+  };
 
-        // Auto-advance to next incomplete item
-        if (selectedCategory) {
-          const currentIdx = selectedCategory.adhkar.findIndex((d) => d.id === dhikr.id);
-          for (let i = currentIdx + 1; i < selectedCategory.adhkar.length; i++) {
-            const nextDhikr = selectedCategory.adhkar[i];
-            const nextCount = counters[nextDhikr.id] || 0;
-            if (nextCount < nextDhikr.repeat) {
-              scrollToItem(nextDhikr.id);
-              break;
-            }
-          }
+  const completeDhikr = (dhikr: Dhikr) => {
+    const current = counters[dhikr.id] || 0;
+    if (current >= dhikr.repeat) return;
+    setCounters((prev) => ({ ...prev, [dhikr.id]: dhikr.repeat }));
+    onDhikrComplete(dhikr);
+  };
+
+  const onDhikrComplete = (dhikr: Dhikr) => {
+    const prev = parseInt(localStorage.getItem("adhkar-done") || "0", 10);
+    localStorage.setItem("adhkar-done", String(prev + 1));
+    localStorage.setItem("last-activity", selectedCategory?.title || "Adhkar");
+
+    if (selectedCategory) {
+      const currentIdx = selectedCategory.adhkar.findIndex((d) => d.id === dhikr.id);
+      for (let i = currentIdx + 1; i < selectedCategory.adhkar.length; i++) {
+        const nextDhikr = selectedCategory.adhkar[i];
+        const nextCount = counters[nextDhikr.id] || 0;
+        if (nextCount < nextDhikr.repeat) {
+          scrollToItem(nextDhikr.id);
+          break;
         }
       }
     }
@@ -120,20 +129,31 @@ const AdhkarPage = () => {
                       {dhikr.translation}
                     </p>
                   )}
-                  <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-border">
                     <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {dhikr.source}
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <button
                         onClick={(e) => { e.stopPropagation(); resetCounter(dhikr.id); }}
-                        className="p-1 rounded-md hover:bg-muted transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-muted transition-colors"
                       >
-                        <RotateCcw className="w-3 h-3 text-muted-foreground" />
+                        <RotateCcw className="w-3.5 h-3.5 text-muted-foreground" />
                       </button>
-                      <span className={`text-sm font-bold ${done ? "text-primary" : "text-foreground"}`}>
+                      <span className={`text-sm font-bold min-w-[40px] text-center ${done ? "text-primary" : "text-foreground"}`}>
                         {current}/{dhikr.repeat}
                       </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); completeDhikr(dhikr); }}
+                        disabled={done}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          done
+                            ? "text-primary"
+                            : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                        }`}
+                      >
+                        <CheckCircle2 className={`w-4 h-4 ${done ? "fill-primary/20" : ""}`} />
+                      </button>
                     </div>
                   </div>
                 </button>

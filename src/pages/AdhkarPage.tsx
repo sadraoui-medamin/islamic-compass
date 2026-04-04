@@ -30,23 +30,32 @@ const AdhkarPage = () => {
     if (current < dhikr.repeat) {
       const newCount = current + 1;
       setCounters((prev) => ({ ...prev, [dhikr.id]: newCount }));
-      // Track completed adhkar
       if (newCount >= dhikr.repeat) {
-        const prev = parseInt(localStorage.getItem("adhkar-done") || "0", 10);
-        localStorage.setItem("adhkar-done", String(prev + 1));
-        localStorage.setItem("last-activity", selectedCategory?.title || "Adhkar");
+        onDhikrComplete(dhikr);
+      }
+    }
+  };
 
-        // Auto-advance to next incomplete item
-        if (selectedCategory) {
-          const currentIdx = selectedCategory.adhkar.findIndex((d) => d.id === dhikr.id);
-          for (let i = currentIdx + 1; i < selectedCategory.adhkar.length; i++) {
-            const nextDhikr = selectedCategory.adhkar[i];
-            const nextCount = counters[nextDhikr.id] || 0;
-            if (nextCount < nextDhikr.repeat) {
-              scrollToItem(nextDhikr.id);
-              break;
-            }
-          }
+  const completeDhikr = (dhikr: Dhikr) => {
+    const current = counters[dhikr.id] || 0;
+    if (current >= dhikr.repeat) return;
+    setCounters((prev) => ({ ...prev, [dhikr.id]: dhikr.repeat }));
+    onDhikrComplete(dhikr);
+  };
+
+  const onDhikrComplete = (dhikr: Dhikr) => {
+    const prev = parseInt(localStorage.getItem("adhkar-done") || "0", 10);
+    localStorage.setItem("adhkar-done", String(prev + 1));
+    localStorage.setItem("last-activity", selectedCategory?.title || "Adhkar");
+
+    if (selectedCategory) {
+      const currentIdx = selectedCategory.adhkar.findIndex((d) => d.id === dhikr.id);
+      for (let i = currentIdx + 1; i < selectedCategory.adhkar.length; i++) {
+        const nextDhikr = selectedCategory.adhkar[i];
+        const nextCount = counters[nextDhikr.id] || 0;
+        if (nextCount < nextDhikr.repeat) {
+          scrollToItem(nextDhikr.id);
+          break;
         }
       }
     }

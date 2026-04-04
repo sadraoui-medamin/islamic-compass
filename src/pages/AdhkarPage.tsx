@@ -26,14 +26,16 @@ const AdhkarPage = () => {
   }, []);
 
   const handleCount = (dhikr: Dhikr) => {
-    const current = counters[dhikr.id] || 0;
-    if (current < dhikr.repeat) {
+    setCounters((prev) => {
+      const current = prev[dhikr.id] || 0;
+      if (current >= dhikr.repeat) return prev;
       const newCount = current + 1;
-      setCounters((prev) => ({ ...prev, [dhikr.id]: newCount }));
+      const updated = { ...prev, [dhikr.id]: newCount };
       if (newCount >= dhikr.repeat) {
-        onDhikrComplete(dhikr);
+        onDhikrComplete(dhikr, updated);
       }
-    }
+      return updated;
+    });
   };
 
   const completeDhikr = (dhikr: Dhikr) => {

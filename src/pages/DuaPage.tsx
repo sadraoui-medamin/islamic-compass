@@ -133,30 +133,29 @@ const DuaPage = () => {
                   <span className="text-xs text-muted-foreground">
                     📖 {dua.source}{dua.reference ? ` — ${dua.reference}` : ""}
                   </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => copyDua(dua)}
-                      className="p-2 rounded-lg hover:bg-muted transition-colors"
-                    >
-                      {copiedId === dua.id ? (
-                        <Check className="w-4 h-4 text-primary" />
-                      ) : (
-                        <Copy className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => completeDua(dua)}
-                      disabled={isDone}
-                      className={`p-2 rounded-lg transition-colors ${
-                        isDone
-                          ? "text-primary"
-                          : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                      }`}
-                    >
-                      <CheckCircle2 className={`w-4 h-4 ${isDone ? "fill-primary/20" : ""}`} />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => copyDua(dua)}
+                    className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    {copiedId === dua.id ? (
+                      <Check className="w-4 h-4 text-primary" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
                 </div>
+                <button
+                  onClick={() => completeDua(dua)}
+                  disabled={isDone}
+                  className={`w-full mt-2 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    isDone
+                      ? "bg-primary/10 text-primary"
+                      : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"
+                  }`}
+                >
+                  <CheckCircle2 className={`w-4 h-4 ${isDone ? "fill-primary/20" : ""}`} />
+                  {isDone ? (lang === "ar" ? "تم ✓" : "Done ✓") : (lang === "ar" ? "تم القراءة" : "Mark as Read")}
+                </button>
               </div>
             );
           })}

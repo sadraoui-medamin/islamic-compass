@@ -129,20 +129,31 @@ const AdhkarPage = () => {
                       {dhikr.translation}
                     </p>
                   )}
-                  <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-border">
                     <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {dhikr.source}
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <button
                         onClick={(e) => { e.stopPropagation(); resetCounter(dhikr.id); }}
-                        className="p-1 rounded-md hover:bg-muted transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-muted transition-colors"
                       >
-                        <RotateCcw className="w-3 h-3 text-muted-foreground" />
+                        <RotateCcw className="w-3.5 h-3.5 text-muted-foreground" />
                       </button>
-                      <span className={`text-sm font-bold ${done ? "text-primary" : "text-foreground"}`}>
+                      <span className={`text-sm font-bold min-w-[40px] text-center ${done ? "text-primary" : "text-foreground"}`}>
                         {current}/{dhikr.repeat}
                       </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); completeDhikr(dhikr); }}
+                        disabled={done}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          done
+                            ? "text-primary"
+                            : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                        }`}
+                      >
+                        <CheckCircle2 className={`w-4 h-4 ${done ? "fill-primary/20" : ""}`} />
+                      </button>
                     </div>
                   </div>
                 </button>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Sun, Moon, Star, ChevronLeft, RotateCcw } from "lucide-react";
+import { Sun, Moon, Star, ChevronLeft, RotateCcw, CheckCircle2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { adhkarCategories, type AdhkarCategory, type Dhikr } from "@/lib/adhkarData";
 import { useLanguage } from "@/lib/languageContext";

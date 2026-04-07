@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type ElementType } from "react";
+import { useCallback, useEffect, useRef, useState, type ElementType } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -30,14 +30,29 @@ const ICON_MAP: Record<string, ElementType> = {
   users: Users,
 };
 
+const COMPLETED_DUAS_KEY = "completed-duas";
+
+function loadCompletedDuas(): Set<number> {
+  try {
+    const arr = JSON.parse(localStorage.getItem(COMPLETED_DUAS_KEY) || "[]");
+    return new Set(arr);
+  } catch {
+    return new Set();
+  }
+}
+
 const DuaTabContent = () => {
   const { t, lang } = useLanguage();
   const { toast } = useToast();
   const isArabic = lang === "ar";
   const [selectedCategory, setSelectedCategory] = useState<DuaCategory | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
-  const [completedDuas, setCompletedDuas] = useState<Set<number>>(new Set());
+  const [completedDuas, setCompletedDuas] = useState<Set<number>>(loadCompletedDuas);
   const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    localStorage.setItem(COMPLETED_DUAS_KEY, JSON.stringify([...completedDuas]));
+  }, [completedDuas]);
 
   const scrollToItem = useCallback((id: number) => {
     window.setTimeout(() => revealItem(itemRefs.current[id]), 180);

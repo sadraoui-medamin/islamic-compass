@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type ElementType } from "react";
+import { useCallback, useEffect, useRef, useState, type ElementType } from "react";
 import { CheckCircle2, ChevronLeft, Moon, RotateCcw, Star, Sun } from "lucide-react";
 import { adhkarCategories, type AdhkarCategory, type Dhikr } from "@/lib/adhkarData";
 import { useLanguage } from "@/lib/languageContext";
@@ -10,12 +10,26 @@ const ICON_MAP: Record<string, ElementType> = {
   star: Star,
 };
 
+const ADHKAR_COUNTERS_KEY = "adhkar-counters";
+
+function loadCounters(): Record<number, number> {
+  try {
+    return JSON.parse(localStorage.getItem(ADHKAR_COUNTERS_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
 const AdhkarTabContent = () => {
   const { t, lang } = useLanguage();
   const isArabic = lang === "ar";
   const [selectedCategory, setSelectedCategory] = useState<AdhkarCategory | null>(null);
-  const [counters, setCounters] = useState<Record<number, number>>({});
+  const [counters, setCounters] = useState<Record<number, number>>(loadCounters);
   const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    localStorage.setItem(ADHKAR_COUNTERS_KEY, JSON.stringify(counters));
+  }, [counters]);
 
   const scrollToItem = useCallback((id: number) => {
     window.setTimeout(() => revealItem(itemRefs.current[id]), 180);

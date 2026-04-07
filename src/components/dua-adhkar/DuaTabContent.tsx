@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type ElementType } from "react";
+import { useCallback, useEffect, useRef, useState, type ElementType } from "react";
 import {
   ArrowRight,
   BookOpen,

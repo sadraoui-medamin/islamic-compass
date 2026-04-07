@@ -341,8 +341,11 @@ const SurahReader = ({ surahNumber, surahName, surahNameAr, startAyah, onBack, o
         <TafsirModal
           surahNumber={surahNumber}
           ayahNumber={tafsirAyah.ayahNumber}
+          ayahText={data?.text?.ayahs.find(a => a.numberInSurah === tafsirAyah.ayahNumber)?.text}
+          totalAyahs={data?.text?.numberOfAyahs}
           surahName={surahName}
           onClose={() => setTafsirAyah(null)}
+          onAyahChange={(newAyah) => setTafsirAyah({ ayahNumber: newAyah })}
         />
       )}
     </div>

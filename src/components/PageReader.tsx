@@ -457,8 +457,9 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
                       ayahText={ayah.text}
                       ayahNumber={ayah.numberInSurah}
                       surahName={group.surahName}
+                      totalAyahs={group.ayahs[group.ayahs.length - 1]?.numberInSurah}
                       isBookmarked={bookmarkedAyahs.has(key)}
-                      onPlay={() => playAyahAudio(group.surahNumber, ayah.numberInSurah)}
+                      onPlayRange={(type, from, to) => handlePlayRange(group.surahNumber, ayah.numberInSurah, type, from, to)}
                       onRepeat={() => repeatAyahAudio(group.surahNumber, ayah.numberInSurah)}
                       onBookmark={() => toggleBookmark(group.surahNumber, ayah)}
                       onTafsir={() => setTafsirAyah({ surahNumber: group.surahNumber, ayahNumber: ayah.numberInSurah, surahName: group.surahName })}

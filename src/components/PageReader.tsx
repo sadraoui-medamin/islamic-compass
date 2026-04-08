@@ -425,11 +425,25 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
 
       {/* Mushaf Content */}
       <div
-        className={`px-3 py-4 transition-all duration-200 ${
-          swipeAnim === "left" ? "-translate-x-full opacity-0" :
-          swipeAnim === "right" ? "translate-x-full opacity-0" : "translate-x-0 opacity-100"
-        }`}
+        style={{
+          perspective: '1200px',
+          perspectiveOrigin: swipeAnim === 'left' ? '100% 50%' : swipeAnim === 'right' ? '0% 50%' : '50% 50%',
+        }}
       >
+        <div
+          className="px-3 py-4"
+          style={{
+            transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease',
+            transformOrigin: swipeAnim === 'left' ? 'right center' : swipeAnim === 'right' ? 'left center' : 'center',
+            transform: swipeAnim === 'left'
+              ? 'rotateY(-90deg) scale(0.95)'
+              : swipeAnim === 'right'
+              ? 'rotateY(90deg) scale(0.95)'
+              : 'rotateY(0deg) scale(1)',
+            opacity: swipeAnim ? 0 : 1,
+            backfaceVisibility: 'hidden',
+          }}
+        >
         {isLoading && Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className={`space-y-2 p-6 mb-4 rounded-xl border ${theme.page}`}>
             <Skeleton className="h-8 w-full" />
@@ -532,6 +546,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
             <span>الحزب {data?.ayahs?.[0]?.hizbQuarter ? Math.ceil(data.ayahs[0].hizbQuarter / 4) : "—"}</span>
           </div>
         )}
+        </div>
       </div>
 
       {tafsirAyah && (

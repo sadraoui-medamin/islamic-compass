@@ -75,7 +75,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
     return () => { if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current); };
   }, []);
 
-  // Swipe handlers - improved for horizontal page turning + vertical scroll
+  // Swipe handlers - vertical: swipe up (finger bottom→top) = next page, swipe down (finger top→bottom) = prev page
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
   }, []);
@@ -87,19 +87,18 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
     const elapsed = Date.now() - touchStartRef.current.time;
     touchStartRef.current = null;
 
-    // Only trigger horizontal swipe if horizontal movement dominates and it's fast enough
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && elapsed < 500) {
-      // RTL: swipe right = next page (forward in reading), swipe left = prev
-      if (dx > 0) {
-        // Swipe right -> next page
+    // Vertical swipe: must dominate over horizontal and be fast enough
+    if (Math.abs(dy) > 80 && Math.abs(dy) > Math.abs(dx) * 1.5 && elapsed < 600) {
+      if (dy < 0) {
+        // Swipe up (finger moves up) → next page
         if (currentPage < 604) {
-          setSwipeAnim("right");
+          setSwipeAnim("left");
           setTimeout(() => { setCurrentPage(p => Math.min(604, p + 1)); setSwipeAnim(null); }, 200);
         }
       } else {
-        // Swipe left -> prev page
+        // Swipe down (finger moves down) → previous page
         if (currentPage > 1) {
-          setSwipeAnim("left");
+          setSwipeAnim("right");
           setTimeout(() => { setCurrentPage(p => Math.max(1, p - 1)); setSwipeAnim(null); }, 200);
         }
       }

@@ -87,16 +87,37 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
     const elapsed = Date.now() - touchStartRef.current.time;
     touchStartRef.current = null;
 
-    // Vertical swipe: must dominate over horizontal and be fast enough
-    if (Math.abs(dy) > 80 && Math.abs(dy) > Math.abs(dx) * 1.5 && elapsed < 600) {
-      if (dy < 0) {
-        // Swipe up (finger moves up) → next page
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    // Determine dominant direction
+    const isHorizontal = absDx > absDy * 1.2 && absDx > 60 && elapsed < 600;
+    const isVertical = absDy > absDx * 1.2 && absDy > 80 && elapsed < 600;
+
+    if (isHorizontal) {
+      // Horizontal swipe: left swipe (finger right→left) = next page (RTL), right swipe = prev
+      if (dx < 0) {
+        // Swipe left → next page
         if (currentPage < 604) {
           setSwipeAnim("left");
           setTimeout(() => { setCurrentPage(p => Math.min(604, p + 1)); setSwipeAnim(null); }, 200);
         }
       } else {
-        // Swipe down (finger moves down) → previous page
+        // Swipe right → previous page
+        if (currentPage > 1) {
+          setSwipeAnim("right");
+          setTimeout(() => { setCurrentPage(p => Math.max(1, p - 1)); setSwipeAnim(null); }, 200);
+        }
+      }
+    } else if (isVertical) {
+      if (dy < 0) {
+        // Swipe up → next page
+        if (currentPage < 604) {
+          setSwipeAnim("left");
+          setTimeout(() => { setCurrentPage(p => Math.min(604, p + 1)); setSwipeAnim(null); }, 200);
+        }
+      } else {
+        // Swipe down → previous page
         if (currentPage > 1) {
           setSwipeAnim("right");
           setTimeout(() => { setCurrentPage(p => Math.max(1, p - 1)); setSwipeAnim(null); }, 200);

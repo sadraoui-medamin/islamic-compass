@@ -405,8 +405,8 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
       {/* Mushaf Content */}
       <div
         className={`px-3 py-4 transition-all duration-200 ${
-          swipeAnim === "left" ? "translate-x-[-30px] opacity-0" :
-          swipeAnim === "right" ? "translate-x-[30px] opacity-0" : "translate-x-0 opacity-100"
+          swipeAnim === "left" ? "translate-y-[-30px] opacity-0" :
+          swipeAnim === "right" ? "translate-y-[30px] opacity-0" : "translate-y-0 opacity-100"
         }`}
       >
         {isLoading && Array.from({ length: 3 }).map((_, i) => (

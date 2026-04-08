@@ -75,7 +75,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
     return () => { if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current); };
   }, []);
 
-  // Swipe handlers - improved for horizontal page turning + vertical scroll
+  // Swipe handlers - vertical: swipe up (finger bottom→top) = next page, swipe down (finger top→bottom) = prev page
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
   }, []);
@@ -87,19 +87,18 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
     const elapsed = Date.now() - touchStartRef.current.time;
     touchStartRef.current = null;
 
-    // Only trigger horizontal swipe if horizontal movement dominates and it's fast enough
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && elapsed < 500) {
-      // RTL: swipe right = next page (forward in reading), swipe left = prev
-      if (dx > 0) {
-        // Swipe right -> next page
+    // Vertical swipe: must dominate over horizontal and be fast enough
+    if (Math.abs(dy) > 80 && Math.abs(dy) > Math.abs(dx) * 1.5 && elapsed < 600) {
+      if (dy < 0) {
+        // Swipe up (finger moves up) → next page
         if (currentPage < 604) {
-          setSwipeAnim("right");
+          setSwipeAnim("left");
           setTimeout(() => { setCurrentPage(p => Math.min(604, p + 1)); setSwipeAnim(null); }, 200);
         }
       } else {
-        // Swipe left -> prev page
+        // Swipe down (finger moves down) → previous page
         if (currentPage > 1) {
-          setSwipeAnim("left");
+          setSwipeAnim("right");
           setTimeout(() => { setCurrentPage(p => Math.max(1, p - 1)); setSwipeAnim(null); }, 200);
         }
       }
@@ -188,6 +187,56 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
       toast({ title: "Audio failed", variant: "destructive" });
     }
   }, [reciter, readingVersion, toast]);
+
+  const playAyahRange = useCallback(async (surahNumber: number, fromAyah: number, toAyah: number) => {
+    try {
+      if (audioRef.current) audioRef.current.pause();
+      const result = await fetchSurahWithAudio(surahNumber, readingVersion, reciter);
+      const ayahsToPlay = result.audio.ayahs.filter(a => a.numberInSurah >= fromAyah && a.numberInSurah <= toAyah && a.audio);
+      if (ayahsToPlay.length === 0) return;
+
+      let idx = 0;
+      const playNext = () => {
+        if (idx >= ayahsToPlay.length) {
+          setPlayingKey(null);
+          setIsPlaying(false);
+          return;
+        }
+        const current = ayahsToPlay[idx];
+        const audio = new Audio(current.audio);
+        audioRef.current = audio;
+        setPlayingKey(`${surahNumber}-${current.numberInSurah}`);
+        setIsPlaying(true);
+        audio.play();
+        audio.onended = () => { idx++; playNext(); };
+      };
+      playNext();
+      toast({ title: `▶ آية ${fromAyah} → ${toAyah}` });
+    } catch {
+      toast({ title: "Audio failed", variant: "destructive" });
+    }
+  }, [reciter, readingVersion, toast]);
+
+  const handlePlayRange = useCallback((surahNumber: number, ayahNumber: number, type: string, from?: number, to?: number) => {
+    if (type === "ayah") {
+      playAyahAudio(surahNumber, ayahNumber);
+    } else if (type === "from-to" && from && to) {
+      playAyahRange(surahNumber, from, to);
+    } else if (type === "page") {
+      // Play all ayahs on this page
+      const allAyahs = data?.ayahs || [];
+      const pageAyahsForSurah = allAyahs.filter(a => (a.surah?.number || 0) === surahNumber);
+      if (pageAyahsForSurah.length > 0) {
+        playAyahRange(surahNumber, pageAyahsForSurah[0].numberInSurah, pageAyahsForSurah[pageAyahsForSurah.length - 1].numberInSurah);
+      }
+    } else if (type === "surah") {
+      // Play entire surah from ayah 1
+      const group = Object.values(groupedAyahs).find(g => g.surahNumber === surahNumber);
+      const totalAyahs = group?.ayahs?.length || 0;
+      // Fetch full surah range
+      playAyahRange(surahNumber, 1, totalAyahs > 0 ? 286 : 286); // max ayahs, API will handle
+    }
+  }, [playAyahAudio, playAyahRange, data, groupedAyahs]);
 
   const repeatAyahAudio = useCallback(async (surahNumber: number, ayahNumberInSurah: number) => {
     try {
@@ -356,8 +405,8 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
       {/* Mushaf Content */}
       <div
         className={`px-3 py-4 transition-all duration-200 ${
-          swipeAnim === "left" ? "translate-x-[-30px] opacity-0" :
-          swipeAnim === "right" ? "translate-x-[30px] opacity-0" : "translate-x-0 opacity-100"
+          swipeAnim === "left" ? "translate-y-[-30px] opacity-0" :
+          swipeAnim === "right" ? "translate-y-[30px] opacity-0" : "translate-y-0 opacity-100"
         }`}
       >
         {isLoading && Array.from({ length: 3 }).map((_, i) => (
@@ -408,8 +457,9 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
                       ayahText={ayah.text}
                       ayahNumber={ayah.numberInSurah}
                       surahName={group.surahName}
+                      totalAyahs={group.ayahs[group.ayahs.length - 1]?.numberInSurah}
                       isBookmarked={bookmarkedAyahs.has(key)}
-                      onPlay={() => playAyahAudio(group.surahNumber, ayah.numberInSurah)}
+                      onPlayRange={(type, from, to) => handlePlayRange(group.surahNumber, ayah.numberInSurah, type, from, to)}
                       onRepeat={() => repeatAyahAudio(group.surahNumber, ayah.numberInSurah)}
                       onBookmark={() => toggleBookmark(group.surahNumber, ayah)}
                       onTafsir={() => setTafsirAyah({ surahNumber: group.surahNumber, ayahNumber: ayah.numberInSurah, surahName: group.surahName })}

@@ -188,6 +188,56 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
     }
   }, [reciter, readingVersion, toast]);
 
+  const playAyahRange = useCallback(async (surahNumber: number, fromAyah: number, toAyah: number) => {
+    try {
+      if (audioRef.current) audioRef.current.pause();
+      const result = await fetchSurahWithAudio(surahNumber, readingVersion, reciter);
+      const ayahsToPlay = result.audio.ayahs.filter(a => a.numberInSurah >= fromAyah && a.numberInSurah <= toAyah && a.audio);
+      if (ayahsToPlay.length === 0) return;
+
+      let idx = 0;
+      const playNext = () => {
+        if (idx >= ayahsToPlay.length) {
+          setPlayingKey(null);
+          setIsPlaying(false);
+          return;
+        }
+        const current = ayahsToPlay[idx];
+        const audio = new Audio(current.audio);
+        audioRef.current = audio;
+        setPlayingKey(`${surahNumber}-${current.numberInSurah}`);
+        setIsPlaying(true);
+        audio.play();
+        audio.onended = () => { idx++; playNext(); };
+      };
+      playNext();
+      toast({ title: `▶ آية ${fromAyah} → ${toAyah}` });
+    } catch {
+      toast({ title: "Audio failed", variant: "destructive" });
+    }
+  }, [reciter, readingVersion, toast]);
+
+  const handlePlayRange = useCallback((surahNumber: number, ayahNumber: number, type: string, from?: number, to?: number) => {
+    if (type === "ayah") {
+      playAyahAudio(surahNumber, ayahNumber);
+    } else if (type === "from-to" && from && to) {
+      playAyahRange(surahNumber, from, to);
+    } else if (type === "page") {
+      // Play all ayahs on this page
+      const allAyahs = data?.ayahs || [];
+      const pageAyahsForSurah = allAyahs.filter(a => (a.surah?.number || 0) === surahNumber);
+      if (pageAyahsForSurah.length > 0) {
+        playAyahRange(surahNumber, pageAyahsForSurah[0].numberInSurah, pageAyahsForSurah[pageAyahsForSurah.length - 1].numberInSurah);
+      }
+    } else if (type === "surah") {
+      // Play entire surah from ayah 1
+      const group = Object.values(groupedAyahs).find(g => g.surahNumber === surahNumber);
+      const totalAyahs = group?.ayahs?.length || 0;
+      // Fetch full surah range
+      playAyahRange(surahNumber, 1, totalAyahs > 0 ? 286 : 286); // max ayahs, API will handle
+    }
+  }, [playAyahAudio, playAyahRange, data, groupedAyahs]);
+
   const repeatAyahAudio = useCallback(async (surahNumber: number, ayahNumberInSurah: number) => {
     try {
       if (audioRef.current) audioRef.current.pause();

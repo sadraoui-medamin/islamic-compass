@@ -546,6 +546,7 @@ const PageReader = ({ pageNumber, juzNumber, onBack, onFullscreenChange }: PageR
             <span>الحزب {data?.ayahs?.[0]?.hizbQuarter ? Math.ceil(data.ayahs[0].hizbQuarter / 4) : "—"}</span>
           </div>
         )}
+        </div>
       </div>
 
       {tafsirAyah && (

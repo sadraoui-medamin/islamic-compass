@@ -149,22 +149,39 @@ const HomePage = () => {
   return (
     <div className="animate-fade-in pb-4">
       {/* Hero */}
-      <div className="islamic-gradient text-primary-foreground p-5 pb-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="relative overflow-hidden text-primary-foreground p-5 pb-6" style={{
+        background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(250 70% 40%) 40%, hsl(var(--emerald-dark)) 80%, hsl(var(--gold) / 0.6) 100%)"
+      }}>
+        {/* Hero decorative elements */}
+        <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-20" style={{ background: "radial-gradient(circle, hsl(var(--gold)), transparent)" }} />
+        <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full blur-2xl opacity-15" style={{ background: "radial-gradient(circle, hsl(var(--primary-foreground)), transparent)" }} />
+        <svg className="absolute top-2 right-2 w-24 h-24 opacity-[0.07]" viewBox="0 0 100 100">
+          <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="currentColor" />
+        </svg>
+
+        <div className="relative z-10 flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl font-bold">{lang === "ar" ? "السلام عليكم" : "Assalamu Alaikum"} 👋</h1>
             <p className="text-sm opacity-80 mt-0.5">{lang === "ar" ? "بارك الله في يومك" : "May Allah bless your day"}</p>
           </div>
-          <div className="flex items-center gap-1.5 bg-primary-foreground/15 rounded-xl px-3 py-1.5">
+          <div className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 border border-primary-foreground/20" style={{
+            background: "linear-gradient(135deg, hsl(var(--gold) / 0.25), hsl(var(--primary-foreground) / 0.1))",
+            backdropFilter: "blur(8px)",
+            boxShadow: "0 4px 16px hsl(0 0% 0% / 0.15)"
+          }}>
             <Flame className="w-4 h-4 text-orange-300" />
             <span className="text-sm font-bold">{streak}</span>
             <span className="text-xs opacity-70">{lang === "ar" ? "يوم" : "days"}</span>
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="relative z-10 grid grid-cols-4 gap-2">
           {quickActions.map((a) => (
             <button key={a.path} onClick={() => { localStorage.setItem("last-activity", a.label); navigate(a.path); }}
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition">
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-primary-foreground/10 hover:border-primary-foreground/25 transition-all hover:scale-105" style={{
+                background: "linear-gradient(180deg, hsl(var(--primary-foreground) / 0.12), hsl(var(--primary-foreground) / 0.05))",
+                backdropFilter: "blur(6px)",
+                boxShadow: "0 2px 8px hsl(0 0% 0% / 0.1)"
+              }}>
               <a.icon className="w-5 h-5" />
               <span className="text-[10px] font-medium">{a.label}</span>
             </button>
@@ -189,12 +206,15 @@ const HomePage = () => {
           <h2 className="text-sm font-bold text-foreground mb-2">{lang === "ar" ? "إحصائياتك" : "Your Stats"}</h2>
           <div className="grid grid-cols-4 gap-2">
             {[
-              { label: lang === "ar" ? "صفحات" : "Pages", value: stats.quranPages, icon: BookOpen },
-              { label: lang === "ar" ? "أذكار" : "Adhkar", value: stats.adhkarDone, icon: Sun },
-              { label: lang === "ar" ? "تسبيح" : "Tasbih", value: stats.tasbihTotal, icon: CircleDot },
-              { label: lang === "ar" ? "تفسير" : "Tafsir", value: stats.tafsirRead, icon: BookOpenCheck },
+              { label: lang === "ar" ? "صفحات" : "Pages", value: stats.quranPages, icon: BookOpen, gradient: "linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--primary) / 0.03))" },
+              { label: lang === "ar" ? "أذكار" : "Adhkar", value: stats.adhkarDone, icon: Sun, gradient: "linear-gradient(135deg, hsl(var(--gold) / 0.12), hsl(var(--gold) / 0.03))" },
+              { label: lang === "ar" ? "تسبيح" : "Tasbih", value: stats.tasbihTotal, icon: CircleDot, gradient: "linear-gradient(135deg, hsl(var(--accent) / 0.1), hsl(var(--accent) / 0.03))" },
+              { label: lang === "ar" ? "تفسير" : "Tafsir", value: stats.tafsirRead, icon: BookOpenCheck, gradient: "linear-gradient(135deg, hsl(var(--emerald-dark) / 0.15), hsl(var(--emerald-dark) / 0.03))" },
             ].map((s) => (
-              <div key={s.label} className="flex flex-col items-center gap-1 p-3 rounded-xl bg-card">
+              <div key={s.label} className="flex flex-col items-center gap-1 p-3 rounded-xl border border-border/50" style={{
+                background: s.gradient,
+                boxShadow: "0 2px 12px hsl(var(--primary) / 0.06)"
+              }}>
                 <s.icon className="w-4 h-4 text-primary" />
                 <span className="text-lg font-bold text-foreground">{s.value}</span>
                 <span className="text-[10px] text-muted-foreground">{s.label}</span>
@@ -211,10 +231,17 @@ const HomePage = () => {
           </div>
           <div className="space-y-2">
             {challenges.map((ch, i) => (
-              <div key={i} className="p-3 rounded-xl bg-card">
+              <div key={i} className="p-3 rounded-xl border border-border/40" style={{
+                background: "linear-gradient(135deg, hsl(var(--card)), hsl(var(--card) / 0.7))",
+                boxShadow: "0 2px 12px hsl(var(--primary) / 0.05), 0 1px 3px hsl(0 0% 0% / 0.04)"
+              }}>
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
-                    <ch.icon className="w-3.5 h-3.5 text-primary" />
+                    <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{
+                      background: "linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary) / 0.05))"
+                    }}>
+                      <ch.icon className="w-3.5 h-3.5 text-primary" />
+                    </div>
                     <span className="text-xs font-medium text-foreground">{ch.label}</span>
                   </div>
                   <span className="text-[10px] text-muted-foreground">{ch.progress}/{ch.goal}</span>

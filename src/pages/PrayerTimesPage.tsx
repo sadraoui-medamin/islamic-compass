@@ -172,22 +172,30 @@ const PrayerTimesPage = () => {
           </Select>
         </div>
 
-        <div className="p-5 rounded-2xl bg-card shadow-md text-center mb-4">
-          <p className="text-3xl font-bold text-foreground">
+        <div className="p-5 rounded-2xl shadow-lg text-center mb-4 border border-border/40 relative overflow-hidden" style={{
+          background: "linear-gradient(145deg, hsl(var(--card)), hsl(var(--card) / 0.8))",
+          boxShadow: "0 8px 32px hsl(var(--primary) / 0.08), 0 2px 8px hsl(0 0% 0% / 0.06)"
+        }}>
+          {/* Decorative orb */}
+          <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-[0.08]" style={{ background: "hsl(var(--primary))" }} />
+          <p className="text-3xl font-bold text-foreground relative z-10">
             {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
           </p>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1 relative z-10">
             {currentTime.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </p>
           {hijri && (
-            <p className="text-xs text-primary mt-1 font-arabic">
+            <p className="text-xs text-primary mt-1 font-arabic relative z-10">
               {hijri.day} {hijri.month.ar} {hijri.year} هـ
             </p>
           )}
           {nextPrayerIdx >= 0 && (
-            <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-light text-primary text-xs font-medium">
-              <Bell className="w-3 h-3" />
-              {t("prayer.next")} {prayerList[nextPrayerIdx].name} {t("prayer.at")} {prayerList[nextPrayerIdx].time}
+            <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium relative z-10 border border-primary/20" style={{
+              background: "linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--primary) / 0.04))",
+              boxShadow: "0 2px 8px hsl(var(--primary) / 0.1)"
+            }}>
+              <Bell className="w-3 h-3 text-primary" />
+              <span className="text-primary">{t("prayer.next")} {prayerList[nextPrayerIdx].name} {t("prayer.at")} {prayerList[nextPrayerIdx].time}</span>
             </div>
           )}
         </div>

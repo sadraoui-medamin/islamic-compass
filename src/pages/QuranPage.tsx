@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { BookOpen, Search, ChevronRight, Bookmark, Clock, Trash2, X, BookText, Layers, FileText, BookOpenCheck } from "lucide-react";
+import { BookOpen, Search, ChevronRight, Bookmark, Clock, Trash2, X, BookText, Layers, FileText, BookOpenCheck, WifiOff, Hash } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useOutletContext } from "react-router-dom";
 import PageHeader from "@/components/PageHeader";
@@ -8,10 +8,12 @@ import { fetchAllSurahs, searchQuran, searchQuranArabic, JUZ_DATA, type Surah } 
 import { getBookmarks, getLastRead, removeBookmark, type Bookmark as BookmarkType } from "@/lib/bookmarks";
 import { Skeleton } from "@/components/ui/skeleton";
 import PageReader from "@/components/PageReader";
+import OfflineAudioList from "@/components/OfflineAudioList";
 import { useLanguage } from "@/lib/languageContext";
 
 type TabType = "surah" | "juz" | "page";
 type DisplayMode = "mushaf" | "list";
+type SearchMode = "text" | "number";
 
 const QuranPage = () => {
   const { t } = useLanguage();
@@ -26,6 +28,13 @@ const QuranPage = () => {
   const [selectedJuz, setSelectedJuz] = useState<number | null>(null);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("mushaf");
   const [headerVisible, setHeaderVisible] = useState(true);
+  const [showOffline, setShowOffline] = useState(false);
+  const [searchMode, setSearchMode] = useState<SearchMode>("number");
+  // Quick jump fields
+  const [jumpSurah, setJumpSurah] = useState("");
+  const [jumpAyah, setJumpAyah] = useState("");
+  const [jumpJuz, setJumpJuz] = useState("");
+  const [jumpPage, setJumpPage] = useState("");
   const lastScrollY = useRef(0);
   const lastRead = getLastRead();
 
@@ -38,8 +47,8 @@ const QuranPage = () => {
     const onScroll = () => {
       const y = main.scrollTop;
       if (y < 10) setHeaderVisible(true);
-      else if (y > lastScrollY.current + 8) setHeaderVisible(false); // scrolling down → hide header
-      else if (y < lastScrollY.current - 8) setHeaderVisible(true); // scrolling up → show header
+      else if (y > lastScrollY.current + 8) setHeaderVisible(false);
+      else if (y < lastScrollY.current - 8) setHeaderVisible(true);
       lastScrollY.current = y;
     };
     main.addEventListener("scroll", onScroll, { passive: true });
@@ -57,20 +66,23 @@ const QuranPage = () => {
       const isArabic = /[\u0600-\u06FF]/.test(search);
       return isArabic ? searchQuranArabic(search) : searchQuran(search);
     },
-    enabled: search.length >= 3,
+    enabled: searchMode === "text" && search.length >= 3,
     staleTime: 60000,
   });
 
   const filteredSurahs = useMemo(() => {
-    if (search.length >= 3 && searchResults) return [];
-    return surahs.filter(
-      (s) =>
-        s.englishName.toLowerCase().includes(search.toLowerCase()) ||
-        s.name.includes(search) ||
-        s.number.toString() === search ||
-        s.englishNameTranslation.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [surahs, search, searchResults]);
+    if (searchMode === "text" && search.length >= 3 && searchResults) return [];
+    if (searchMode === "text") {
+      return surahs.filter(
+        (s) =>
+          s.englishName.toLowerCase().includes(search.toLowerCase()) ||
+          s.name.includes(search) ||
+          s.number.toString() === search ||
+          s.englishNameTranslation.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    return surahs;
+  }, [surahs, search, searchResults, searchMode]);
 
   const openSurah = (surah: Surah, ayah?: number) => {
     setSelectedSurah(surah);
@@ -85,10 +97,32 @@ const QuranPage = () => {
     setBookmarks(getBookmarks());
   };
 
+  const handleQuickJump = (type: "surah" | "ayah" | "juz" | "page") => {
+    if (type === "page") {
+      const num = parseInt(jumpPage);
+      if (num >= 1 && num <= 604) { setSelectedPage(num); setJumpPage(""); }
+    } else if (type === "juz") {
+      const num = parseInt(jumpJuz);
+      if (num >= 1 && num <= 30) { setSelectedJuz(num); setJumpJuz(""); }
+    } else if (type === "surah") {
+      const num = parseInt(jumpSurah);
+      const ayahNum = parseInt(jumpAyah) || undefined;
+      if (num >= 1 && num <= 114) {
+        const s = surahs.find(s => s.number === num);
+        if (s) { openSurah(s, ayahNum); setJumpSurah(""); setJumpAyah(""); }
+      }
+    }
+  };
+
+  // Show offline page
+  if (showOffline) {
+    return <OfflineAudioList onBack={() => setShowOffline(false)} />;
+  }
+
   if (displayMode === "mushaf" && !selectedSurah && selectedPage === null && selectedJuz === null && !search && !showBookmarks) {
     return (
       <div className="animate-fade-in">
-        <div className={`islamic-gradient text-primary-foreground p-4 pb-3 transition-all duration-300 overflow-hidden ${headerVisible ? "max-h-40 opacity-100" : "max-h-0 opacity-0 p-0 pb-0"}`}>
+        <div className={`islamic-gradient text-primary-foreground p-4 pb-3 transition-all duration-300 overflow-hidden ${headerVisible ? "max-h-60 opacity-100" : "max-h-0 opacity-0 p-0 pb-0"}`}>
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="text-lg font-bold flex items-center gap-2">
@@ -97,6 +131,13 @@ const QuranPage = () => {
               <p className="text-xs opacity-70 font-arabic">{t("quran.subtitle")}</p>
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={() => setShowOffline(true)}
+                className="p-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/15 transition"
+                title="Offline Audio"
+              >
+                <WifiOff className="w-4 h-4" />
+              </button>
               <button
                 onClick={() => setShowBookmarks(true)}
                 className="p-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/15 transition"
@@ -111,6 +152,46 @@ const QuranPage = () => {
                 {t("quran.surahList")}
               </button>
             </div>
+          </div>
+
+          {/* Quick Jump in Mushaf mode */}
+          <div className="grid grid-cols-4 gap-2 mb-2">
+            <form onSubmit={(e) => { e.preventDefault(); handleQuickJump("surah"); }} className="relative">
+              <input
+                type="number" min={1} max={114} value={jumpSurah}
+                onChange={(e) => setJumpSurah(e.target.value)}
+                placeholder="سورة"
+                className="w-full h-9 text-center text-xs bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 rounded-lg border-0 outline-none focus:bg-primary-foreground/20 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[8px] opacity-40">1-114</span>
+            </form>
+            <form onSubmit={(e) => { e.preventDefault(); handleQuickJump("surah"); }} className="relative">
+              <input
+                type="number" min={1} max={286} value={jumpAyah}
+                onChange={(e) => setJumpAyah(e.target.value)}
+                placeholder="آية"
+                className="w-full h-9 text-center text-xs bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 rounded-lg border-0 outline-none focus:bg-primary-foreground/20 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[8px] opacity-40">آية</span>
+            </form>
+            <form onSubmit={(e) => { e.preventDefault(); handleQuickJump("juz"); }} className="relative">
+              <input
+                type="number" min={1} max={30} value={jumpJuz}
+                onChange={(e) => setJumpJuz(e.target.value)}
+                placeholder="جزء"
+                className="w-full h-9 text-center text-xs bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 rounded-lg border-0 outline-none focus:bg-primary-foreground/20 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[8px] opacity-40">1-30</span>
+            </form>
+            <form onSubmit={(e) => { e.preventDefault(); handleQuickJump("page"); }} className="relative">
+              <input
+                type="number" min={1} max={604} value={jumpPage}
+                onChange={(e) => setJumpPage(e.target.value)}
+                placeholder="صفحة"
+                className="w-full h-9 text-center text-xs bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 rounded-lg border-0 outline-none focus:bg-primary-foreground/20 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[8px] opacity-40">1-604</span>
+            </form>
           </div>
 
           {lastRead && (
@@ -166,30 +247,99 @@ const QuranPage = () => {
   return (
     <div className="animate-fade-in">
       <PageHeader title={t("quran.title")} subtitle={t("quran.subtitle")} icon={<BookOpen className="w-6 h-6" />}>
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-foreground/50" />
-            <input
-              type="text"
-              placeholder={t("quran.search")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 text-sm border-0 outline-none focus:bg-primary-foreground/15 transition"
-            />
+        {/* Search mode toggle + fields */}
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSearchMode("number")}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                searchMode === "number" ? "bg-primary-foreground/20 text-primary-foreground" : "bg-primary-foreground/10 text-primary-foreground/60 hover:bg-primary-foreground/15"
+              }`}
+            >
+              <Hash className="w-3 h-3" /> انتقال سريع
+            </button>
+            <button
+              onClick={() => setSearchMode("text")}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                searchMode === "text" ? "bg-primary-foreground/20 text-primary-foreground" : "bg-primary-foreground/10 text-primary-foreground/60 hover:bg-primary-foreground/15"
+              }`}
+            >
+              <Search className="w-3 h-3" /> بحث نصي
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={() => setShowOffline(true)}
+              className="p-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/15 transition"
+              title="Offline Audio"
+            >
+              <WifiOff className="w-4 h-4 text-primary-foreground" />
+            </button>
+            <button
+              onClick={() => setDisplayMode("mushaf")}
+              className="px-3 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/15 transition"
+              title="Mushaf View"
+            >
+              <BookOpenCheck className="w-4 h-4 text-primary-foreground" />
+            </button>
+            <button
+              onClick={() => setShowBookmarks(!showBookmarks)}
+              className={`px-3 rounded-xl transition ${showBookmarks ? "bg-primary-foreground/20" : "bg-primary-foreground/10 hover:bg-primary-foreground/15"}`}
+            >
+              <Bookmark className="w-4 h-4 text-primary-foreground" />
+            </button>
           </div>
-          <button
-            onClick={() => setDisplayMode("mushaf")}
-            className="px-3 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/15 transition"
-            title="Mushaf View"
-          >
-            <BookOpenCheck className="w-4 h-4 text-primary-foreground" />
-          </button>
-          <button
-            onClick={() => setShowBookmarks(!showBookmarks)}
-            className={`px-3 rounded-xl transition ${showBookmarks ? "bg-primary-foreground/20" : "bg-primary-foreground/10 hover:bg-primary-foreground/15"}`}
-          >
-            <Bookmark className="w-4 h-4 text-primary-foreground" />
-          </button>
+
+          {searchMode === "number" ? (
+            <div className="grid grid-cols-4 gap-2">
+              <form onSubmit={(e) => { e.preventDefault(); handleQuickJump("surah"); }} className="relative">
+                <input
+                  type="number" min={1} max={114} value={jumpSurah}
+                  onChange={(e) => setJumpSurah(e.target.value)}
+                  placeholder="سورة"
+                  className="w-full h-9 text-center text-xs bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 rounded-lg border-0 outline-none focus:bg-primary-foreground/20 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[8px] text-primary-foreground/30">1-114</span>
+              </form>
+              <form onSubmit={(e) => { e.preventDefault(); handleQuickJump("surah"); }} className="relative">
+                <input
+                  type="number" min={1} max={286} value={jumpAyah}
+                  onChange={(e) => setJumpAyah(e.target.value)}
+                  placeholder="آية"
+                  className="w-full h-9 text-center text-xs bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 rounded-lg border-0 outline-none focus:bg-primary-foreground/20 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[8px] text-primary-foreground/30">آية</span>
+              </form>
+              <form onSubmit={(e) => { e.preventDefault(); handleQuickJump("juz"); }} className="relative">
+                <input
+                  type="number" min={1} max={30} value={jumpJuz}
+                  onChange={(e) => setJumpJuz(e.target.value)}
+                  placeholder="جزء"
+                  className="w-full h-9 text-center text-xs bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 rounded-lg border-0 outline-none focus:bg-primary-foreground/20 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[8px] text-primary-foreground/30">1-30</span>
+              </form>
+              <form onSubmit={(e) => { e.preventDefault(); handleQuickJump("page"); }} className="relative">
+                <input
+                  type="number" min={1} max={604} value={jumpPage}
+                  onChange={(e) => setJumpPage(e.target.value)}
+                  placeholder="صفحة"
+                  className="w-full h-9 text-center text-xs bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 rounded-lg border-0 outline-none focus:bg-primary-foreground/20 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[8px] text-primary-foreground/30">1-604</span>
+              </form>
+            </div>
+          ) : (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-foreground/50" />
+              <input
+                type="text"
+                placeholder={t("quran.search")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/40 text-sm border-0 outline-none focus:bg-primary-foreground/15 transition"
+              />
+            </div>
+          )}
         </div>
       </PageHeader>
 
@@ -255,7 +405,7 @@ const QuranPage = () => {
           </div>
         )}
 
-        {search.length >= 3 && searchResults && !showBookmarks && (
+        {searchMode === "text" && search.length >= 3 && searchResults && !showBookmarks && (
           <div className="space-y-2">
             <h3 className="text-sm font-semibold text-foreground mb-2">
               {t("quran.searchResults")} ({searchResults.count})
@@ -285,7 +435,7 @@ const QuranPage = () => {
           </div>
         )}
 
-        {!showBookmarks && search.length < 3 && (
+        {!showBookmarks && !(searchMode === "text" && search.length >= 3) && (
           <>
             <div className="flex gap-1 bg-muted rounded-xl p-1 mb-3">
               {tabs.map((tab) => (

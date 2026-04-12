@@ -75,7 +75,7 @@ const TasbihPage = () => {
       const prev = parseInt(localStorage.getItem("tasbih-total") || "0", 10);
       localStorage.setItem("tasbih-total", String(prev + 1));
       localStorage.setItem("last-activity", active?.english || "Tasbih");
-      if (next === Math.floor(active.target / 2) || next === active.target) {
+      if (active && (next === Math.floor(active.target / 2) || next === active.target)) {
         showEncouragement();
       }
       if (active && next >= active.target && activeIdx < items.length - 1) {
